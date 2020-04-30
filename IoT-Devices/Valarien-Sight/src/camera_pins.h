@@ -47,7 +47,7 @@ void initCamera_Config()
 
     if (psramFound())
     {
-        camera_config.frame_size = FRAMESIZE_UXGA;
+        camera_config.frame_size = FRAMESIZE_VGA;
         camera_config.jpeg_quality = 10;
         camera_config.fb_count = 2;
     }

@@ -28,6 +28,7 @@ class MyServerCallbacks : public BLEServerCallbacks
 {
 	void onConnect(BLEServer *pServer)
 	{
+		Serial.println("BLE Client Connected");
 		Serial.println(pServer->getConnId());
 		deviceConnected = true;
 		BLEDevice::startAdvertising();
@@ -39,10 +40,11 @@ class MyServerCallbacks : public BLEServerCallbacks
 	}
 };
 
-
 void setup()
 {
+
 	Serial.begin(115200);
+	// pinMode(4,OUTPUT);
 	initCamera_Config();
 	delay(200);
 	esp_err_t err = esp_camera_init(&camera_config);
@@ -66,7 +68,7 @@ void setup()
 
 	pServer = BLEDevice::createServer();
 
-	//pServer->setCallbacks(new MyServerCallbacks());
+	pServer->setCallbacks(new MyServerCallbacks());
 	// Create the BLE Service
 	BLEService *pService = pServer->createService(SERVICE_UUID);
 	// Create a BLE Characteristic
@@ -100,4 +102,8 @@ void loop()
 
 		// pCharacteristic->
 	}
+	// digitalWrite(4, HIGH);
+	// delay(500);
+	// digitalWrite(4, LOW);
+	// delay(500);
 }
