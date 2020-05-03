@@ -9,3 +9,12 @@ Flash: [=======   ]  66.8% (used 2102711 bytes from 3145728 bytes)
 // Async web server
 RAM:   [=         ]  13.0% (used 42736 bytes from 327680 bytes)
 Flash: [===       ]  26.0% (used 818850 bytes from 3145728 bytes)
+
+// ESP-SEVER
+RAM:   [=         ]   5.9% (used 19436 bytes from 327680 bytes)
+Flash: [=         ]  14.3% (used 449687 bytes from 3145728 bytes)
+
+
+// ESP-SEVER + BLE
+RAM:   [==        ]  18.2% (used 59684 bytes from 327680 bytes)
+Flash: [=====     ]  46.6% (used 1464722 bytes from 3145728 bytes)
