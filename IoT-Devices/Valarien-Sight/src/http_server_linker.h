@@ -1,0 +1,2 @@
+void startCameraServer();
+void stopcamServer();

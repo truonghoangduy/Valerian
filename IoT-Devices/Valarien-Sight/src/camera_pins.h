@@ -47,6 +47,7 @@ void initCamera_Config()
 
     if (psramFound())
     {
+        Serial.println("Has PSRAM");
         camera_config.frame_size = FRAMESIZE_VGA;
         camera_config.jpeg_quality = 10;
         camera_config.fb_count = 2;
@@ -58,3 +59,4 @@ void initCamera_Config()
         camera_config.fb_count = 1;
     }
 }
+

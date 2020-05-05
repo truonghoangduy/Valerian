@@ -1,0 +1,1 @@
+ESP32-FTDI: https://i1.wp.com/randomnerdtutorials.com/wp-content/uploads/2019/12/ESP32-CAM-FTDI-programmer-5V-supply.png?w=750&ssl=1
