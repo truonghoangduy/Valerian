@@ -2,7 +2,7 @@
 #include "esp_camera.h"
 #include "Arduino.h"
 #include <http_server_linker.h>
-httpd_handle_t capture_httpd = NULL;
+// httpd_handle_t capture_httpd = NULL;
 camera_fb_t *fb = NULL;
 static esp_err_t capture_handler(httpd_req_t *req)
 {
@@ -19,17 +19,17 @@ static esp_err_t capture_handler(httpd_req_t *req)
         Serial.print("Fail To Capture");
     }
 
-    res_flag = httpd_resp_send(req,(const char *)fb->buf,fb->len);
+    res_flag = httpd_resp_send(req, (const char *)fb->buf, fb->len);
 
-    // free memory 
+    // free memory
     esp_camera_fb_return(fb);
-    
+
     // Capture
 
     return res_flag;
 }
 
-void startCameraServer()
+httpd_handle_t  startCameraServer()
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
@@ -40,10 +40,22 @@ void startCameraServer()
         .user_ctx = NULL};
 
     config.server_port = 80;
+    httpd_handle_t capture_httpd = NULL;
 
     if (httpd_start(&capture_httpd, &config) == ESP_OK)
     {
         /* code */
         httpd_register_uri_handler(capture_httpd, &capture_uri);
     }
+    return capture_httpd;
+}
+
+void deInitCameraServer(httpd_handle_t server)
+{
+    if (server != NULL)
+    {
+        httpd_stop(server);
+        server = NULL;
+    }
+   
 }
