@@ -4,6 +4,7 @@
 #include <http_server_linker.h>
 // httpd_handle_t capture_httpd = NULL;
 camera_fb_t *fb = NULL;
+
 static esp_err_t capture_handler(httpd_req_t *req)
 {
 
@@ -58,4 +59,15 @@ void deInitCameraServer(httpd_handle_t server)
         server = NULL;
     }
    
+}
+
+void stopcamServer()
+{
+    if (capture_httpd != NULL)
+    {
+        if (httpd_stop(capture_httpd) == ESP_OK)
+        {
+            Serial.println("Server stopped");
+        }
+    }
 }

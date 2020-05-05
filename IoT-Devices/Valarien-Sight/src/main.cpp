@@ -10,7 +10,7 @@
 #include <ArduinoJson.h>
 #include <SPIFFS.h>
 #include <WiFi.h>
-// #include <ESPmDNS.h>
+#include <ESPmDNS.h>
 #include <esp_http_server.h>
 #include "soc/soc.h" //disable brownout problems
 #include "soc/rtc_cntl_reg.h"
@@ -20,8 +20,8 @@
 #define CAMERA_MODEL_AI_THINKER
 
 const char *filename = "/config.json"; // SPIFFS config file
-char *ssid = "NguyenDieuLinh";
-char *password = "0937437499";
+char *ssid = "Ambrose";
+char *password = "12345678";
 
 // BLE Section
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
@@ -72,22 +72,6 @@ void setup()
   Serial.print("Heap Init CAM config");
   Serial.println(ESP.getFreeHeap());
   Serial.println("Init Cam Sussesfully");
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.println("WiFi connected");
-
-  Serial.print("Camera Stream Ready! Go to: http://");
-  Serial.print(WiFi.localIP());
-  delay(100);
-
-  Serial.print("Heap after HTTP Server");
-  Serial.println(ESP.getFreeHeap());
-  delay(200);
 }
 
 void initBLEMod()
@@ -152,27 +136,25 @@ void turnOffWifiMode(){
   
 }
 int closingcounter = 4;
-void loop()
-{
-  if (Serial.available() > 0)
-  {
-    if (Serial.readString() == "1")
-    {
-      turnOnWifiMode();
-      delay(5000);
-      turnOffWifiMode();
-      Serial.println("");
-    }
+// void loop()
+// {
+//   if (Serial.available() > 0)
+//   {
+//     if (Serial.readString() == "1")
+//     {
+//       turnOnWifiMode();
+//       delay(5000);
+//       turnOffWifiMode();
+//       Serial.println("");
+//     }
     
-  }  
-}
+//   }  
+// }
 
 void loop()
 {
-
   if (digitalRead(4) == HIGH)
   {
-
     if (buttonActive == false)
     {
 
@@ -182,10 +164,12 @@ void loop()
 
     if ((millis() - buttonTimer > longPressTime) && (longPressActive == false))
     {
+		Serial.println("Deinit BLE");
       BLEDevice::deinit(false);
+
       longPressActive = true;
       Serial.print("Start Server");
-      server = startCameraServer();
+      turnOnWifiMode();
     }
   }
   else
@@ -201,14 +185,9 @@ void loop()
       }
       else
       {
-        deInitCameraServer(server);
         Serial.print("Start BLE");
-
+		turnOffWifiMode();
         initBLEMod();
-        server = NULL;
-
-        
-        
       }
 
       buttonActive = false;
