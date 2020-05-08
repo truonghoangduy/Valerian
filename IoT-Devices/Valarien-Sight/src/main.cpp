@@ -34,9 +34,27 @@ bool deviceConnected = false;
 boolean buttonActive = false;
 boolean longPressActive = false;
 long buttonTimer = 0;
-byte  longPressTime = 250;
-httpd_handle_t server = NULL;
+byte longPressTime = 250;
+
 //
+
+class BLECharectoristicCallBack : public BLECharacteristicCallbacks
+{
+  void onWrite(BLECharacteristic *pCharacteristic)
+  {
+    // pCharacteristic->getData();
+    std::string value = pCharacteristic->getValue();
+
+    if (value.length() > 0)
+    {
+      Serial.println(value.c_str());
+      digitalWrite(22, HIGH);
+      Serial.println(ESP.getFreeHeap());
+      // Serial.println(ESP.getfree;
+    }
+  }
+};
+
 class MyServerCallbacks : public BLEServerCallbacks
 {
   void onConnect(BLEServer *pServer)
@@ -50,30 +68,6 @@ class MyServerCallbacks : public BLEServerCallbacks
     deviceConnected = false;
   }
 };
-void setup()
-{
-  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
-
-  Serial.begin(115200);
-  Serial.setDebugOutput(true);
-  Serial.println("Hello World");
-  Serial.print("Heap");
-  Serial.println(ESP.getFreeHeap());
-  pinMode(4, INPUT);
-  initCamera_Config();
-  delay(500);
-
-  esp_err_t err = esp_camera_init(&camera_config);
-  if (err != ESP_OK)
-  {
-    Serial.printf("Camera init failed with error 0x%x", err);
-    return;
-  }
-  Serial.print("Heap Init CAM config");
-  Serial.println(ESP.getFreeHeap());
-  Serial.println("Init Cam Sussesfully");
-}
-
 void initBLEMod()
 {
   BLEDevice::init("ESP32 Valarien Sight");
@@ -89,8 +83,9 @@ void initBLEMod()
           BLECharacteristic::PROPERTY_WRITE |
           BLECharacteristic::PROPERTY_NOTIFY |
           BLECharacteristic::PROPERTY_INDICATE);
-  pCharacteristic->addDescriptor(new BLE2902());
+  pCharacteristic->setCallbacks(new BLECharectoristicCallBack());
 
+  pCharacteristic->addDescriptor(new BLE2902());
   pService->start();
 
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
@@ -100,10 +95,45 @@ void initBLEMod()
   BLEDevice::startAdvertising();
   Serial.println("Waiting a client connection to notify...");
 }
+uint8_t value = 0;
 
+void sendFakeData(){
+  pCharacteristic->setValue(&value,4);
+  pCharacteristic->notify();
+  delay(1000);
+  value++;
+}
+void setup()
+{
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
 
-void turnOnWifiMode(){
-   // Serial.println("Init Cam Sussesfully");
+  Serial.begin(115200);
+  Serial.setDebugOutput(true);
+  Serial.println("Hello World");
+  Serial.print("Heap");
+  Serial.println(ESP.getFreeHeap());
+  pinMode(4, INPUT);
+
+  initCamera_Config();
+  delay(500);
+  pinMode(22, INPUT);
+  digitalWrite(22, LOW);
+
+  // esp_err_t err = esp_camera_init(&camera_config);
+  // if (err != ESP_OK)
+  // {
+  //   Serial.printf("Camera init failed with error 0x%x", err);
+  //   return;
+  // }
+  Serial.print("Heap Init CAM config");
+  Serial.println(ESP.getFreeHeap());
+  Serial.println("Init Cam Sussesfully");
+  initBLEMod();
+}
+
+void turnOnWifiMode()
+{
+  // Serial.println("Init Cam Sussesfully");
   WiFi.mode(WIFI_STA);
 
   WiFi.begin(ssid, password);
@@ -129,11 +159,11 @@ void turnOnWifiMode(){
   MDNS.addService("_http", "_tcp", 80);
 }
 
-void turnOffWifiMode(){
+void turnOffWifiMode()
+{
   stopcamServer();
-  WiFi.disconnect(true,true);
+  WiFi.disconnect(true, true);
   MDNS.end();
-  
 }
 int closingcounter = 4;
 // void loop()
@@ -147,52 +177,53 @@ int closingcounter = 4;
 //       turnOffWifiMode();
 //       Serial.println("");
 //     }
-    
-//   }  
+
+//   }
 // }
 
 void loop()
 {
-  if (digitalRead(4) == HIGH)
-  {
-    if (buttonActive == false)
-    {
+  sendFakeData();
+  // if (digitalRead(4) == HIGH)
+  // {
+  //   if (buttonActive == false)
+  //   {
 
-      buttonActive = true;
-      buttonTimer = millis();
-    }
+  //     buttonActive = true;
+  //     buttonTimer = millis();
+  //   }
 
-    if ((millis() - buttonTimer > longPressTime) && (longPressActive == false))
-    {
-		Serial.println("Deinit BLE");
-      BLEDevice::deinit(false);
+  //   if ((millis() - buttonTimer > longPressTime) && (longPressActive == false))
+  //   {
+  // 	Serial.println("Deinit BLE");
+  //     BLEDevice::deinit(false);
 
-      longPressActive = true;
-      Serial.print("Start Server");
-      turnOnWifiMode();
-    }
-  }
-  else
-  {
+  //     longPressActive = true;
+  //     Serial.print("Start Server");
+  //     turnOnWifiMode();
+  //   }
+  // }
+  // else
+  // {
 
-    if (buttonActive == true)
-    {
+  //   if (buttonActive == true)
+  //   {
 
-      if (longPressActive == true)
-      {
+  //     if (longPressActive == true)
+  //     {
 
-        longPressActive = false;
-      }
-      else
-      {
-        Serial.print("Start BLE");
-		turnOffWifiMode();
-        initBLEMod();
-      }
+  //       longPressActive = false;
+  //     }
+  //     else
+  //     {
+  //       Serial.print("Start BLE");
+  // 	turnOffWifiMode();
+  //       initBLEMod();
+  //     }
 
-      buttonActive = false;
-    }
-  }
+  //     buttonActive = false;
+  //   }
+  // }
 }
 
 //   for (size_t i = 0; i < fb->len; i++)
