@@ -1,8 +1,9 @@
 # Valerian 
-Valerian is a smart glass project
+Valerian is a smart glass project a lite prototype to bringing idea to Low price devices support for the blind
+Current stack of the project will follow
   - Image Recognition
   - Related Information about the object
-  - Notification
+  - Notification ( How phone can notify it BLE watch ? )
 
 ### Tech
 * [Flutter](https://flutter.dev) - for mobile development
