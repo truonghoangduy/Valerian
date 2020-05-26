@@ -1,113 +1,334 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:math' as math;
+import 'package:Valerian/bloc/ble_bloc.dart';
+import 'package:clay_containers/widgets/clay_containers.dart';
+import 'package:clay_containers/widgets/clay_text.dart';
+import 'package:flare_flutter/flare_actor.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blue/flutter_blue.dart';
+import 'package:Valerian/widgets.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flare_flutter/flare_actor.dart';
+import 'package:clay_containers/clay_containers.dart';
 
-void main() {
-  runApp(MyApp());
+class AppColoring {
+  static const Color background = Color.fromRGBO(240, 240, 243, 1);
+  static const Color neumorphisum = Color(0xFFF2F2F2);
 }
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+void main() {
+  runApp(FlutterBlueApp());
+}
+
+class FlutterBlueApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      color: Colors.lightBlue,
+      home: StreamBuilder<BluetoothState>(
+          stream: FlutterBlue.instance.state,
+          initialData: BluetoothState.unknown,
+          builder: (c, snapshot) {
+            final state = snapshot.data;
+            if (state == BluetoothState.on) {
+              return FindDevicesScreen();
+            }
+            return BluetoothOffScreen(state: state);
+          }),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class BluetoothOffScreen extends StatelessWidget {
+  const BluetoothOffScreen({Key key, this.state}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  final BluetoothState state;
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+      backgroundColor: Colors.lightBlue,
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+            Icon(
+              Icons.bluetooth_disabled,
+              size: 200.0,
+              color: Colors.white54,
             ),
+            // Image.asset("assets/images/concept_image.png",),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              'Bluetooth Adapter is ${state.toString().substring(15)}.',
+              style: Theme.of(context)
+                  .primaryTextTheme
+                  .subhead
+                  .copyWith(color: Colors.white),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class FindDevicesScreen extends StatefulWidget {
+  @override
+  _FindDevicesScreenState createState() => _FindDevicesScreenState();
+}
+
+class _FindDevicesScreenState extends State<FindDevicesScreen> {
+  BLE_Bloc _ble_bloc;
+  _FindDevicesScreenState() {
+    _ble_bloc = BLE_Bloc();
+  }
+  @override
+  void initState() {
+    super.initState();
+    _ble_bloc.scanDevices();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _ble_bloc.dispose();
+  }
+
+  Widget discoverBLE(
+      BluetoothDeviceState snapshot, Size queryData, BuildContext context) {
+    if (BluetoothDeviceState.connected == snapshot) {
+      return DeviceScrren();
+
+      //       GestureDetector(
+      //           // backgroundColor: Colors.green,
+      //           child: Container(
+      //   color: AppColoring.neumorphisum,
+      //   child: Center(
+      //     child: ClayContainer(
+      //       color: AppColoring.neumorphisum,
+      //       height: 200,
+      //       width: 200,
+      //     ),
+      //   ),
+      // ),
+      //           onDoubleTap: () {
+      //             _ble_bloc.writeTo(_ble_bloc.targetCharacteristic,
+      //                 "nv2fBYQqNjpJSgDrvZdmspCq5L0KfDcOcvxbdJH4WKcYYJpSbwnv2fBYQqNjpJSgDrvZdmspCq5L0KfDcOcvxbdJH4WKcYYJpSbwZZZZZ");
+      //           })
+    } else if (BluetoothDeviceState.disconnected == snapshot) {
+      return Container(
+        alignment: Alignment.center,
+        color: AppColoring.background,
+        child: Stack(
+          children: <Widget>[
+            Center(
+                // color: Colors.black,
+                // width: queryData.width,
+                // height: queryData.height*0.3,
+                child: Container(
+                    width: queryData.width,
+                    height: queryData.height * 0.5,
+                    child: lost_Connection)),
+            Center(
+                child: Container(
+                    margin: EdgeInsets.only(
+                      top: queryData.height * 0.37,
+                    ),
+                    child: Text(
+                      "Losing Connection",
+                      style: TextStyle(
+                          fontFamily: 'OpenSans',
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: queryData.width * 0.05),
+                    ))),
+            // StreamBuilder<String>(
+            //     stream: _ble_bloc.ble_content.stream,
+            //     builder: (context, snapshot) {
+            //       if (!snapshot.hasData) {
+            //         return Container(
+            //           width: 100,
+            //           height: 100,
+            //           color: Colors.blueAccent,
+            //         );
+            //       } else {
+            //         return Text(snapshot.data);
+            //       }
+            //     }),
+          ],
+        ),
+      );
+    }
+  }
+
+  final FlareActor ble_scaning = FlareActor(
+    "assets/images/Bluetooth Scan.flr",
+    isPaused: false,
+    snapToEnd: true,
+    fit: BoxFit.scaleDown,
+    animation: "Untitled",
+  );
+  final FlareActor lost_Connection = FlareActor(
+    "assets/images/dost-login.flr",
+    isPaused: false,
+    snapToEnd: true,
+    // fit: BoxFit.scaleDown,
+    animation: "Untitled",
+  );
+  @override
+  Widget build(BuildContext context) {
+    Size queryData = MediaQuery.of(context).size;
+    // TODO: implement build
+    return Scaffold(
+      // appBar: AppBar(
+      //   title: Text(
+      //     "ESP32",
+      //     style: TextStyle(fontFamily: 'OpenSans', fontWeight: FontWeight.bold),
+      //   ),
+      // ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            title: Text('Home'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.image),
+            title: Text('Recogintion'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            title: Text('Sesting'),
+          ),
+        ],
+        currentIndex: 0,
+        selectedItemColor: Colors.amber[800],
+        onTap: (i) {},
+      ),
+      body: Container(
+        color: AppColoring.background,
+        child: StreamBuilder<BluetoothDeviceState>(
+            stream: _ble_bloc.device_state.stream,
+            initialData: null,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return ble_scaning;
+              }
+              return discoverBLE(snapshot.data, queryData, context);
+            }),
+      ),
+    );
+  }
+}
+
+class DeviceScrren extends StatefulWidget {
+
+  @override
+  _DeviceScrrenState createState() => _DeviceScrrenState();
+}
+
+class _DeviceScrrenState extends State<DeviceScrren> {
+  BLE_Bloc _ble_bloc;
+  _DeviceScrrenState(){
+_ble_bloc = BLE_Bloc();
+  }
+  @override
+  Widget build(BuildContext context) {
+    Size queryData = MediaQuery.of(context).size;
+    return Container(
+      width: double.infinity,
+      height: queryData.height,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Container(
+              // color: Colors.yellowAccent,
+              width: queryData.width * 0.4,
+              height: queryData.height,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ...[1, 2, 3].map((e) => ClayContainer(
+                        width: queryData.width * 0.3,
+                        height: queryData.height * 0.15,
+                        child: Icon(
+                          Icons.notifications,
+                          size: 40,
+                        )
+                        // FlareActor("assets/images/Success Check.flr",
+                        // animation: "Untitled",),
+                        )),
+                    StreamBuilder(
+                        stream: _ble_bloc.ble_char_data,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return Container();
+                          } else {
+                            print(utf8.decode(snapshot.data));
+                            return Text(utf8.decode(snapshot.data),
+                                style: TextStyle(
+                                  color: Colors.blueAccent
+                                  ));
+                          }
+                        }),
+                  ])),
+          Container(
+            // color: Colors.black45,
+            width: queryData.width * 0.6,
+            height: queryData.height,
+            child: Center(
+              child: ClayContainer(
+                width: queryData.width * 0.6,
+                height: queryData.height * 0.65,
+                depth: 10,
+                spread: 10,
+                borderRadius: 15,
+                child: Center(
+                    child: Transform.rotate(
+                  angle: -math.pi / 4,
+                  child: Image.asset("assets/images/concept_image.png"),
+                )),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class BLE_Functionality extends StatefulWidget {
+  @override
+  _BLE_FunctionalityState createState() => _BLE_FunctionalityState();
+}
+
+class _BLE_FunctionalityState extends State<BLE_Functionality> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+class DeviceServies extends StatelessWidget {
+  final BluetoothCharacteristic characteristic;
+  DeviceServies(this.characteristic) {}
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        Container(
+          color: Colors.yellowAccent,
+          width: double.infinity,
+          height: double.infinity,
+        ),
+        Container(
+          color: Colors.blue,
+          width: double.infinity,
+          height: double.infinity,
+        )
+      ],
     );
   }
 }
