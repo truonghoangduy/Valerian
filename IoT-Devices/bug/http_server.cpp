@@ -12,7 +12,7 @@ static esp_err_t capture_handler(httpd_req_t *req)
 
     // Susses Flag
     esp_err_t res_flag = ESP_OK;
-    //Init header to Respone
+    // Init header to Respone
     httpd_resp_set_type(req, "image/jpeg");
     httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
@@ -21,9 +21,12 @@ static esp_err_t capture_handler(httpd_req_t *req)
     {
         Serial.print("Fail To Capture");
     }
-
-    res_flag = httpd_resp_send(req, (const char *)fb->buf, fb->len);
-    Serial.println("Sended Img");
+    res_flag = httpd_resp_send(req, (const char *)fb->buf,fb->len);
+    if (res_flag == ESP_OK)
+    {
+        Serial.println("Sended Img");
+    }
+    
 
     // free memory
     esp_camera_fb_return(fb);
@@ -41,7 +44,7 @@ static esp_err_t defaut_uri_handler(httpd_req_t *req)
     httpd_resp_set_type(req, "text/html");
     // httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
-    res_flag = httpd_resp_send(req,(char *)ipInformation, strlen(ipInformation));
+    res_flag = httpd_resp_send(req,(const char *)ipInformation, strlen(ipInformation));
     //192.168.1.7
     if (res_flag == ESP_OK)
     {
@@ -89,16 +92,5 @@ void deInitCameraServer(httpd_handle_t server)
     {
         httpd_stop(server);
         server = NULL;
-    }
-}
-
-void stopcamServer()
-{
-    if (capture_httpd != NULL)
-    {
-        if (httpd_stop(capture_httpd) == ESP_OK)
-        {
-            Serial.println("Server stopped");
-        }
     }
 }
