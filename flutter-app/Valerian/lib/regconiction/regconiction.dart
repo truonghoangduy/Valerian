@@ -4,14 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:tflite/tflite.dart';
 import 'package:image/image.dart' as img;
 import 'package:http/http.dart' as http;
+// import 'dart:ui' as ui;
 
-/// [Recognition] model & lable & documentation 
+
+/// [Recognition] model & lable & documentation
 /// from tensorflow could be found here
 /// https://www.tensorflow.org/lite/models/object_detection/overview
 ///
 
 class Recognition {
-
+  static List<int> temper;
+  // static ui.Image testFlutterImageLib;
   Future<bool> loadModel() async {
     try {
       String res = await Tflite.loadModel(
@@ -46,7 +49,6 @@ class Recognition {
 
   objectDection(img.Image img) async {
     try {
-
       var recognitions = await Tflite.detectObjectOnBinary(
           binary: imageToByteListUint8(img, 300), // required
           threshold: 0.1, // defaults to 0.1
@@ -62,13 +64,20 @@ class Recognition {
     }
   }
 
-    static Future<List<dynamic>> objectDection_V1(String imgURL) async {
-
+  static Future<List<dynamic>> objectDection_V1(String imgURL) async {
     try {
-      var respone = await http.get(imgURL);      
+      if (!imgURL.contains("http")) {
+        return null;
+      }
+      var respone = await http.get(imgURL);
+      if (respone.statusCode !=  200) {
+        return null;
+      }
       var pic = img.decodeImage(respone.bodyBytes); // byte Input
-      var resize = img.copyResize(pic,width: 300,height: 300); // Resize
-
+      var resize = img.copyResize(pic, width: 300, height: 300); // Resize
+      // ui.decodeImageFromList(respone.bodyBytes, (result) {
+      //   testFlutterImageLib = result;
+      //  });
       // resize.getBytes();
       var recognitions = await Tflite.detectObjectOnBinary(
           binary: imageToByteListUint8(resize, 300),
@@ -76,15 +85,54 @@ class Recognition {
           numResultsPerClass: 1, // defaults to 5
           asynch: true);
       if (recognitions != null) {
+        temper = img.encodePng(pic); // Faster then jpeg
+        // (
+        // pic,
+        // 100,
+        // 200,
+        // 300,
+        // 400,
+        // // (recognitions[0]['rect']['y'] * 300).round(),
+        // // (recognitions[0]['rect']['w'] * 300).round(),
+        // // (recognitions[0]['rect']['x'] * 300).round(),
+        // // (recognitions[0]['rect']['h'] * 300).round(),
+        // Color.fromRGBO(255, 100, 50, 1).red)
+        // )
         print("Decteced");
         return recognitions;
-      }else{
+      } else {
         return null;
       }
     } catch (e) {
       print(e);
     }
   }
+
+    static Future<List<dynamic>> objectDection_V2_BlueSerial(Uint8List imgBytes) async {
+    try {
+      var pic = img.decodeImage(imgBytes); // byte Input
+      var resize = img.copyResize(pic, width: 300, height: 300); // Resize
+      // ui.decodeImageFromList(respone.bodyBytes, (result) {
+      //   testFlutterImageLib = result;
+      //  });
+      // resize.getBytes();
+      var recognitions = await Tflite.detectObjectOnBinary(
+          binary: imageToByteListUint8(resize, 300),
+          threshold: 0.3, // defaults to 0.1
+          numResultsPerClass: 1, // defaults to 5
+          asynch: true);
+      if (recognitions != null) {
+        temper = img.encodePng(pic); // Faster then jpeg
+        print("Decteced");
+        return recognitions;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
 
   dispose() async {
     await Tflite.close();
