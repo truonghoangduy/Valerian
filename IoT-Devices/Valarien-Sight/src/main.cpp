@@ -10,6 +10,7 @@
 #include <ArduinoJson.h>
 #include <SPIFFS.h>
 #include <WiFi.h>
+// mDNS
 #include <ESPmDNS.h>
 #include <esp_http_server.h>
 #include "soc/soc.h" //disable brownout problems
@@ -20,12 +21,13 @@
 #define CAMERA_MODEL_AI_THINKER
 
 const char *filename = "/config.json"; // SPIFFS config file
-char *ssid = "Ambrose";
-char *password = "12345678";
+char *ssid = "NguyenDieuLinh";
+char *password = "0937437499";
 
 // BLE Section
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
 BLEServer *pServer = NULL;
 BLECharacteristic *pCharacteristic = NULL;
 bool deviceConnected = false;
@@ -97,44 +99,18 @@ void initBLEMod()
 }
 uint8_t value = 0;
 
-void sendFakeData(){
-  pCharacteristic->setValue(&value,4);
+void sendFakeData()
+{
+  pCharacteristic->setValue(&value, 4);
   pCharacteristic->notify();
   delay(1000);
   value++;
-}
-void setup()
-{
-  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
-
-  Serial.begin(115200);
-  Serial.setDebugOutput(true);
-  Serial.println("Hello World");
-  Serial.print("Heap");
-  Serial.println(ESP.getFreeHeap());
-  pinMode(4, INPUT);
-
-  initCamera_Config();
-  delay(500);
-  pinMode(22, INPUT);
-  digitalWrite(22, LOW);
-
-  // esp_err_t err = esp_camera_init(&camera_config);
-  // if (err != ESP_OK)
-  // {
-  //   Serial.printf("Camera init failed with error 0x%x", err);
-  //   return;
-  // }
-  Serial.print("Heap Init CAM config");
-  Serial.println(ESP.getFreeHeap());
-  Serial.println("Init Cam Sussesfully");
-  initBLEMod();
 }
 
 void turnOnWifiMode()
 {
   // Serial.println("Init Cam Sussesfully");
-  WiFi.mode(WIFI_STA);
+  // WiFi.mode(WIFI_STA);
 
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
@@ -145,25 +121,58 @@ void turnOnWifiMode()
   Serial.println("");
   Serial.println("WiFi connected");
 
+  delay(400);
+
+  // if (!MDNS.begin("valerian"))
+  // {
+  //   Serial.println("Error setting up MDNS responder!");
+  //   delay(300);
+  // }
+  // MDNS.addServiceTxt("_http","_tcp","caputre","caputre");
+  
+
+  startCameraServer();
+    // MDNS.addService("_http", "_tcp", 80);
+
+  // MDNS.addService("_http", "_tcp", 80);
   Serial.print("Camera Stream Ready! Go to: http://");
   Serial.print(WiFi.localIP());
-  delay(100);
+}
 
-  if (!MDNS.begin("esp32"))
+void setup()
+{
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
+
+  Serial.begin(115200);
+  Serial.setDebugOutput(true);
+  Serial.println("Hello World");
+  Serial.print("Heap");
+  Serial.println(ESP.getFreeHeap());
+  // pinMode(4, INPUT);
+
+  initCamera_Config();
+  delay(500);
+  // pinMode(22, INPUT);
+  // digitalWrite(22, LOW);
+
+  esp_err_t err = esp_camera_init(&camera_config);
+  if (err != ESP_OK)
   {
-    Serial.println("Error setting up MDNS responder!");
-    delay(300);
+    Serial.printf("Camera init failed with error 0x%x", err);
+    return;
   }
-  startCameraServer();
-
-  MDNS.addService("_http", "_tcp", 80);
+  Serial.print("Heap Init CAM config");
+  Serial.println(ESP.getFreeHeap());
+  Serial.println("Init Cam Sussesfully");
+  // initBLEMod();
+  turnOnWifiMode();
 }
 
 void turnOffWifiMode()
 {
   stopcamServer();
   WiFi.disconnect(true, true);
-  MDNS.end();
+  // MDNS.end();
 }
 int closingcounter = 4;
 // void loop()
@@ -183,7 +192,7 @@ int closingcounter = 4;
 
 void loop()
 {
-  sendFakeData();
+  // sendFakeData();
   // if (digitalRead(4) == HIGH)
   // {
   //   if (buttonActive == false)
