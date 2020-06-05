@@ -2,13 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 import 'package:Valerian/bloc/ble_bloc.dart';
+import 'package:Valerian/regconiction/regconiction.dart';
+import 'package:Valerian/widgets/detectObjectOnImage.dart';
 import 'package:clay_containers/widgets/clay_containers.dart';
 import 'package:clay_containers/widgets/clay_text.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-import 'package:Valerian/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:clay_containers/clay_containers.dart';
@@ -17,26 +19,46 @@ class AppColoring {
   static const Color background = Color.fromRGBO(240, 240, 243, 1);
   static const Color neumorphisum = Color(0xFFF2F2F2);
 }
+// Idea BLE send by mode 0|-------,------- For wificonfig
+enum BLE_SEND_MODE{
+  WIFI_CONFIG, // DEMIELT is|
+  NOTIFICATION
+}
 
-void main() {
+void main() async {
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  WidgetsFlutterBinding.ensureInitialized();
+  await Recognition().loadModel();
+
   runApp(FlutterBlueApp());
+}
+
+enum AppMode{
+  DetectionTest,
+  BLeTest
 }
 
 class FlutterBlueApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final mode = AppMode.DetectionTest;
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       color: Colors.lightBlue,
-      home: StreamBuilder<BluetoothState>(
-          stream: FlutterBlue.instance.state,
-          initialData: BluetoothState.unknown,
-          builder: (c, snapshot) {
-            final state = snapshot.data;
-            if (state == BluetoothState.on) {
-              return FindDevicesScreen();
-            }
-            return BluetoothOffScreen(state: state);
-          }),
+      home:mode==AppMode.DetectionTest?
+          Detection():
+
+          StreamBuilder<BluetoothState>(
+              stream: FlutterBlue.instance.state,
+              initialData: BluetoothState.unknown,
+              builder: (c, snapshot) {
+                final state = snapshot.data;
+                if (state == BluetoothState.on) {
+                  return FindDevicesScreen();
+                }
+                return BluetoothOffScreen(state: state);
+              }),
     );
   }
 }
@@ -98,7 +120,8 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
 
   Widget discoverBLE(
       BluetoothDeviceState snapshot, Size queryData, BuildContext context) {
-    if (BluetoothDeviceState.connected == snapshot) {
+    if (BluetoothDeviceState.connected != snapshot) {
+      // Debug
       return DeviceScrren();
 
       //       GestureDetector(
@@ -166,7 +189,7 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
   final FlareActor ble_scaning = FlareActor(
     "assets/images/Bluetooth Scan.flr",
     isPaused: false,
-    snapToEnd: true,
+    snapToEnd: false,
     fit: BoxFit.scaleDown,
     animation: "Untitled",
   );
@@ -213,7 +236,7 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
             stream: _ble_bloc.device_state.stream,
             initialData: null,
             builder: (context, snapshot) {
-              if (!snapshot.hasData) {
+              if (snapshot.hasData) {
                 return ble_scaning;
               }
               return discoverBLE(snapshot.data, queryData, context);
@@ -224,16 +247,26 @@ class _FindDevicesScreenState extends State<FindDevicesScreen> {
 }
 
 class DeviceScrren extends StatefulWidget {
-
   @override
   _DeviceScrrenState createState() => _DeviceScrrenState();
 }
 
 class _DeviceScrrenState extends State<DeviceScrren> {
   BLE_Bloc _ble_bloc;
-  _DeviceScrrenState(){
-_ble_bloc = BLE_Bloc();
+  final Map<String, Map<bool, IconData>> uiIcon = {
+    '0': {true: Icons.wifi, false: Icons.signal_wifi_off},
+    '1': {false: Icons.notifications_none, true: Icons.notifications_active},
+    '2': {false: Icons.collections_bookmark, true: Icons.collections_bookmark}
+  };
+  _DeviceScrrenState() {
+    _ble_bloc = BLE_Bloc();
   }
+
+  final TextEditingController _controllerWifi_SSID = TextEditingController();
+  final TextEditingController _controllerWifi_Pass = TextEditingController();
+
+
+  String pressed;
   @override
   Widget build(BuildContext context) {
     Size queryData = MediaQuery.of(context).size;
@@ -250,29 +283,54 @@ _ble_bloc = BLE_Bloc();
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ...[1, 2, 3].map((e) => ClayContainer(
-                        width: queryData.width * 0.3,
-                        height: queryData.height * 0.15,
-                        child: Icon(
-                          Icons.notifications,
-                          size: 40,
+                    ...uiIcon.keys.map((e) => GestureDetector(
+                            onDoubleTap: () => {
+                                  wifiDialog(context),
+                                  setState(() {
+                                    this.pressed = e;
+                                  })
+                                },
+                            child: ClayContainer(
+                                width: queryData.width * 0.3,
+                                height: queryData.height * 0.15,
+                                child: Icon(e == this.pressed
+                                    ? uiIcon[e][this.pressed == e]
+                                    : uiIcon[e][false],
+                                    size: 30,
+                                    color: e==this.pressed?Colors.blueAccent:Colors.black,)))
+                        // ...[1, 2, 3].map((e) => GestureDetector(
+                        //   onDoubleTap: ()=>{
+
+                        //     setState(() {
+                        //       this.pressed = e;
+                        //     })
+                        //   },
+                        //                       child: ClayContainer(
+                        //       width: queryData.width * 0.3,
+                        //       height: queryData.height * 0.15,
+                        //       child: Icon(
+                        //         Icons.wifi,
+                        //         size: 45,
+                        //         color: e==this.pressed?Colors.blueAccent:Colors.black,
+                        //       )
+                        //       // FlareActor("assets/images/Success Check.flr",
+                        //       // animation: "Untitled",),
+                        //       ),
+                        // )),
+                        // StreamBuilder(
+                        //     stream: _ble_bloc.ble_char_data,
+                        //     builder: (context, snapshot) {
+                        //       if (!snapshot.hasData) {
+                        //         return Container();
+                        //       } else {
+                        //         print(utf8.decode(snapshot.data));
+                        //         return Text(utf8.decode(snapshot.data),
+                        //             style: TextStyle(
+                        //               color: Colors.blueAccent
+                        //               ));
+                        //       }
+                        //     }),
                         )
-                        // FlareActor("assets/images/Success Check.flr",
-                        // animation: "Untitled",),
-                        )),
-                    StreamBuilder(
-                        stream: _ble_bloc.ble_char_data,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return Container();
-                          } else {
-                            print(utf8.decode(snapshot.data));
-                            return Text(utf8.decode(snapshot.data),
-                                style: TextStyle(
-                                  color: Colors.blueAccent
-                                  ));
-                          }
-                        }),
                   ])),
           Container(
             // color: Colors.black45,
@@ -297,6 +355,34 @@ _ble_bloc = BLE_Bloc();
       ),
     );
   }
+
+
+
+
+  wifiDialog(BuildContext context) async{
+    return await showDialog(context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context)=>Dialog(
+        child: Container(
+          child:Column(
+            children: [
+              ...["SSID","Password"].map((e) => buildWifiConfig(e=="SSID"?_controllerWifi_SSID:_controllerWifi_Pass, e))
+
+            ],
+          )
+        )
+    ));
+  }
+
+  Widget buildWifiConfig(TextEditingController textcontroller,String textLable){
+    return TextField(
+      controller: textcontroller,
+      decoration: InputDecoration(
+        labelText: textLable
+      ),
+
+    );
+  }
 }
 
 class BLE_Functionality extends StatefulWidget {
@@ -307,7 +393,9 @@ class BLE_Functionality extends StatefulWidget {
 class _BLE_FunctionalityState extends State<BLE_Functionality> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Container(
+
+    );
   }
 }
 
