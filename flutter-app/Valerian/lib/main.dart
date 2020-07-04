@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'package:Valerian/bloc/ble_bloc.dart';
 import 'package:Valerian/regconiction/regconiction.dart';
+import 'package:Valerian/screens/findDevices.dart';
+import 'package:Valerian/screens/testByte.dart';
+import 'package:Valerian/widgets/bluetoothOff.dart';
 import 'package:Valerian/widgets/detectObjectOnImage.dart';
 import 'package:clay_containers/widgets/clay_containers.dart';
 import 'package:clay_containers/widgets/clay_text.dart';
@@ -16,12 +19,8 @@ import 'package:flare_flutter/flare_actor.dart';
 import 'package:clay_containers/clay_containers.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
-class AppColoring {
-  static const Color background = Color.fromRGBO(240, 240, 243, 1);
-  static const Color neumorphisum = Color(0xFFF2F2F2);
-}
 // Idea BLE send by mode 0|-------,------- For wificonfig
-enum BLE_SEND_MODE{
+enum BLE_SEND_MODE {
   WIFI_CONFIG, // DEMIELT is|
   NOTIFICATION
 }
@@ -30,73 +29,88 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-  // await Recognition().loadModel();
+  await Recognition().loadModel();
 
   runApp(FlutterBlueApp());
 }
 
-enum AppMode{
-  DetectionTest,
-  BLeTest
-}
+enum AppMode { DetectionTest, BLueTest }
 
 class FlutterBlueApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final mode = AppMode.DetectionTest;
+    final mode = AppMode.BLueTest;
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      color: Colors.lightBlue,
-      home:mode==AppMode.DetectionTest?
-          BLuetoothDiscover():
-          Container()
+        debugShowCheckedModeBanner: false,
+        color: Colors.lightBlue,
+        home:
+            // mode==AppMode.DetectionTest?
+            //     BLuetoothDiscover():
+            //     // TestByte():
+            //     // Detection():
+            //     // Container()
 
-          // StreamBuilder<BluetoothState>(
-          //     stream: FlutterBlue.instance.state,
-          //     initialData: BluetoothState.unknown,
-          //     builder: (c, snapshot) {
-          //       final state = snapshot.data;
-          //       if (state == BluetoothState.on) {
-          //         return FindDevicesScreen();
-          //       }
-          //       return BluetoothOffScreen(state: state);
-          //     }),
-    );
+            // StreamBuilder<BluetoothState>(
+            //     stream: FlutterBluetoothSerial.instance.state,
+            //     // initialData: BluetoothState.STATE_ON,
+            //     builder: (c, snapshot) {
+            //       final state = snapshot.data;
+            //       if (state == BluetoothState.STATE_ON) {
+            //         return FindDevicesScreen();
+            //       }
+            //       if (state == BluetoothState.UNKNOWN) {
+            //         return Container();
+            //       }
+            //       if (state == BluetoothState.STATE_OFF) {
+            //         return Container();
+            //       }
+            //       // return BLuetoothDiscover();
+            //       // return Container();
+            //     }),
+            BluetoothApdaterController());
   }
 }
 
-// class BluetoothOffScreen extends StatelessWidget {
-//   const BluetoothOffScreen({Key key, this.state}) : super(key: key);
+class BluetoothApdaterController extends StatefulWidget {
+  @override
+  _BluetoothApdaterControllerState createState() =>
+      _BluetoothApdaterControllerState();
+}
 
-//   final BluetoothState state;
+class _BluetoothApdaterControllerState
+    extends State<BluetoothApdaterController> {
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: Colors.lightBlue,
-//       body: Center(
-//         child: Column(
-//           mainAxisSize: MainAxisSize.min,
-//           children: <Widget>[
-//             Icon(
-//               Icons.bluetooth_disabled,
-//               size: 200.0,
-//               color: Colors.white54,
-//             ),
-//             // Image.asset("assets/images/concept_image.png",),
-//             Text(
-//               'Bluetooth Adapter is ${state.toString().substring(15)}.',
-//               style: Theme.of(context)
-//                   .primaryTextTheme
-//                   .subhead
-//                   .copyWith(color: Colors.white),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
+  BluetoothState state;
+  
+  @override
+  void initState(){
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+          child: StreamBuilder<BluetoothState>(
+                      stream: FlutterBluetoothSerial.instance.onStateChanged(),
+                      builder: (context, snap) {
+                        print("Sate Change");
+                        print(snap.data.toString());
+                        if (snap.data == BluetoothState.STATE_OFF) {
+                          return BluetoothOffScreen();
+                        }
+                        return BLuetoothDiscover(
+                          // color: Colors.black,
+                          // width: 100,
+                          // height: 100,
+                        );
+                      }
+            )
+      ),
+    );
+  }
+}
 
 // class FindDevicesScreen extends StatefulWidget {
 //   @override
@@ -267,7 +281,6 @@ class FlutterBlueApp extends StatelessWidget {
 //   final TextEditingController _controllerWifi_SSID = TextEditingController();
 //   final TextEditingController _controllerWifi_Pass = TextEditingController();
 
-
 //   String pressed;
 //   @override
 //   Widget build(BuildContext context) {
@@ -357,9 +370,6 @@ class FlutterBlueApp extends StatelessWidget {
 //       ),
 //     );
 //   }
-
-
-
 
 //   wifiDialog(BuildContext context) async{
 //     return await showDialog(context: context,

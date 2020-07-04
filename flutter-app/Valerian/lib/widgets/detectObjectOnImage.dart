@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:Valerian/bloc/blue_serial.dart';
 import 'package:Valerian/regconiction/regconiction.dart';
 import 'package:flare_flutter/flare_actor.dart';
@@ -22,7 +24,7 @@ class _DetectionState extends State<Detection> {
   _DetectionState() {}
   @override
   Widget build(BuildContext context) {
-    String path = "";
+    String path = "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRaXQvw-ZZQOpY1h-wC5hYRvodgyz5iLTXo8FgyQAZjgUjEXA1k&usqp=CAU";
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -98,42 +100,19 @@ class _BLuetoothDiscoverState extends State<BLuetoothDiscover> {
       body: SingleChildScrollView(
               child: Column(
           children: <Widget>[
-            SwitchListTile(
-              title: Text('Enable Bluetooth'),
-              value: _bluetoothState.isEnabled,
-              onChanged: (bool value) async {
-                if (value) {
-                  await FlutterBluetoothSerial.instance.requestEnable();
-                  var vaule = await FlutterBluetoothSerial.instance.isAvailable;
-                  print(vaule);
-                } else {
-                  await FlutterBluetoothSerial.instance.requestDisable();
-                }
-              },
-            ),
-            // StreamBuilder<BluetoothDiscoveryResult>(
-            //   stream: FlutterBluetoothSerial.instance.startDiscovery(),
-            //   builder: (BuildContext context,AsyncSnapshot<BluetoothDiscoveryResult> snapshot){
-            //     if (snapshot.hasData && snapshot.data.device.address !=null && snapshot.data.device.name == BOARD_NAME) {
-            //       if (snapshot.data.device.name == BOARD_NAME) {
-            //         print("Find Ya");
-            //         return Container(
-            //         color: Colors.yellowAccent,
-            //         width: 100,
-            //         height: 100,
-            //         child:Text(snapshot.data.device.name!=null?snapshot.data.device.name:snapshot.data.device.address),
-
-            //       );
-            //       }
-
-            //     }else{
-            //       return Container(
-            //         color: Colors.blueAccent,
-            //         width: 100,
-            //         height: 100,
-            //       );
+            // SwitchListTile(
+            //   title: Text('Enable Bluetooth'),
+            //   value: _bluetoothState.isEnabled,
+            //   onChanged: (bool value) async {
+            //     if (value) {
+            //       await FlutterBluetoothSerial.instance.requestEnable();
+            //       var vaule = await FlutterBluetoothSerial.instance.isAvailable;
+            //       print(vaule);
+            //     } else {
+            //       await FlutterBluetoothSerial.instance.requestDisable();
             //     }
-            // })
+            //   },
+            // ),
             FutureBuilder<bool>(
                 future: this._bluetoothBloc.scanDevices(),
                 initialData: false,
@@ -153,6 +132,10 @@ class _BLuetoothDiscoverState extends State<BLuetoothDiscover> {
                     // child: ble_scaning,
                   );
                 }),
+
+            FloatingActionButton(onPressed: ()=>{
+              this._bluetoothBloc.scanLoopForDevices()
+            },),
             FloatingActionButton(
               onPressed: () async {
                 if (await this._bluetoothBloc.connectToDevice()) {
@@ -171,23 +154,54 @@ class _BLuetoothDiscoverState extends State<BLuetoothDiscover> {
                 child: Text("Capture"),
               ),
               onPressed: () async{
-               await this._bluetoothBloc.sending();
+               await this._bluetoothBloc.invokeCAMERA();
             }),
             FloatingActionButton(
               // child: ,
 
               onPressed: () => {
                 setState(() {
-                  this.captured = true;
+                  this.captured = !this.captured;
                 })
               },
               backgroundColor: Colors.yellow,
             ),
 
             this.captured
-                ? Image.memory(
-                    // Uint8List.fromList(this._bluetoothBloc.image)
-                    this._bluetoothBloc.pictureformBuffer)
+                ? Column(
+                  children: <Widget>[
+                    Image.memory(
+                        // Uint8List.fromList(this._bluetoothBloc.image)
+                        this._bluetoothBloc.pictureformBuffer),
+                    FutureBuilder<List<dynamic>>(
+                      future:Recognition.objectDection_V2_BlueSerial(this._bluetoothBloc.pictureformBuffer),
+                      builder: (context,snap){
+                      if (snap.data != null) {
+                      print(snap.data);
+                      return Column(
+                        children: <Widget>[
+                          // Image.network(path),
+                          Image.memory(Recognition.temper),
+
+                          Container(
+                            width: 200,
+                            height: 200,
+                            child: Text(
+                              snap.data[0]['detectedClass'] +
+                                  ": " +
+                                  snap.data[0]['confidenceInClass'].toString(),
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          ),
+                        ],
+                        // color:Colors.blueAccent
+                      );
+                    } else {
+                      return Container(color: Colors.black);
+                    }
+                    },)
+                  ],
+                )
                 : Container(
                     color: Colors.black,
                     width: 100,

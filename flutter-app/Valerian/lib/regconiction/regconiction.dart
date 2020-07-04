@@ -1,11 +1,13 @@
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:tflite/tflite.dart';
 import 'package:image/image.dart' as img;
 import 'package:http/http.dart' as http;
-// import 'dart:ui' as ui;
 
+// import 'dart:ui' as ui;
+const JPEG_EOI = [255, 217];
 
 /// [Recognition] model & lable & documentation
 /// from tensorflow could be found here
@@ -14,6 +16,7 @@ import 'package:http/http.dart' as http;
 
 class Recognition {
   static List<int> temper;
+  static List<dynamic> detectionResult;
   // static ui.Image testFlutterImageLib;
   Future<bool> loadModel() async {
     try {
@@ -70,7 +73,7 @@ class Recognition {
         return null;
       }
       var respone = await http.get(imgURL);
-      if (respone.statusCode !=  200) {
+      if (respone.statusCode != 200) {
         return null;
       }
       var pic = img.decodeImage(respone.bodyBytes); // byte Input
@@ -108,22 +111,36 @@ class Recognition {
     }
   }
 
-    static Future<List<dynamic>> objectDection_V2_BlueSerial(Uint8List imgBytes) async {
+  static bool jpegCheck(Uint8List imgBytes) {
+    if (imgBytes.last != 217 &&
+        imgBytes.elementAt(imgBytes.length - 2) != 255) {
+      print("Missing JPEG EOI");
+    }
+  }
+
+  static Future<List<dynamic>> objectDection_V2_BlueSerial(
+      Uint8List imgBytes) async {
     try {
-      var pic = img.decodeImage(imgBytes); // byte Input
+      img.Image pic;
+      if (imgBytes.last != 217 &&
+          imgBytes.elementAt(imgBytes.length - 2) != 255) {
+        print("Missing JPEG EOI");
+        // imgBytes.addAll([255, 217]);
+      }
+      pic = img.decodeImage(imgBytes); // byte Input
+
+      // // var newer  = Image.memory(imgBytes);
+      print('${pic.width}  :  ${pic.height}');
       var resize = img.copyResize(pic, width: 300, height: 300); // Resize
-      // ui.decodeImageFromList(respone.bodyBytes, (result) {
-      //   testFlutterImageLib = result;
-      //  });
-      // resize.getBytes();
+      temper = img.encodePng(pic);
       var recognitions = await Tflite.detectObjectOnBinary(
           binary: imageToByteListUint8(resize, 300),
           threshold: 0.3, // defaults to 0.1
           numResultsPerClass: 1, // defaults to 5
           asynch: true);
       if (recognitions != null) {
-        temper = img.encodePng(pic); // Faster then jpeg
-        print("Decteced");
+        // temper = img.encodePng(pic); // Faster then jpeg
+        // print("Decteced");
         return recognitions;
       } else {
         return null;
@@ -132,7 +149,6 @@ class Recognition {
       print(e);
     }
   }
-
 
   dispose() async {
     await Tflite.close();
@@ -146,3 +162,40 @@ class Recognition {
 
   Recognition._internal();
 }
+
+// static Future<List<dynamic>> objectDection_V2_BlueSerial(Uint8List imgBytes) async {
+//   try {
+//     img.Image pic;
+//     Uint8List newIamge;
+//     if (imgBytes.last != 217 &&
+//         imgBytes.elementAt(imgBytes.length - 2) != 255) {
+//       print("Missing JPEG EOI");
+//       // imgBytes.addAll([255, 217]);
+//       newIamge = new Uint8List.fromList([...imgBytes.toList(), ...JPEG_EOI]);
+//     }
+//     if (newIamge != null) {
+//       pic = img.decodeImage(newIamge);
+//     } else {
+//       pic = img.decodeImage(imgBytes); // byte Input
+
+//     }
+//     // // var newer  = Image.memory(imgBytes);
+//     print('${pic.width}  :  ${pic.height}');
+//     var resize = img.copyResize(pic, width: 300, height: 300); // Resize
+//     temper = img.encodePng(pic);
+//     var recognitions = await Tflite.detectObjectOnBinary(
+//         binary: imageToByteListUint8(resize, 300),
+//         threshold: 0.3, // defaults to 0.1
+//         numResultsPerClass: 1, // defaults to 5
+//         asynch: true);
+//     if (recognitions != null) {
+//       // temper = img.encodePng(pic); // Faster then jpeg
+//       // print("Decteced");
+//       return recognitions;
+//     } else {
+//       return null;
+//     }
+//   } catch (e) {
+//     print(e);
+//   }
+// }
