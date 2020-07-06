@@ -1,0 +1,18 @@
+
+{confidenceInClass: 0.34375, detectedClass: tv, 
+rect: {y: 0.0, w: 1.0, x: 0.0, h: 0.9939101934432983}}, 
+{confidenceInClass: 0.18359375, detectedClass: person, rect: 
+{y: 0.004427357576787472, w: 0.038701653480529785, x: 0.6281519532203674, h: 0.015231297351419926}}, 
+{confidenceInClass: 0.18359375, detectedClass: person, rect: {y: 0.00366239994764328, w: 0.04322934150695801, x: 0.5734986662864685, h: 0.0152312982827425}}
+
+
+1. Mở đầu
+    1.1 Lý do chon đề tài
+    1.2 Tóm tắt nội dung
+2. Nội dung
+    2.1 Cơ sở lý luận
+    2.2 Lý luận Chứng Minh
+
+3. Kết luận
+    3.1 Bài học nhóm rút ra : Đánh giá
+    3.2 Liên hệ xã hội

@@ -2,6 +2,7 @@ import 'dart:ffi';
 
 import 'package:Valerian/bloc/blue_serial.dart';
 import 'package:Valerian/regconiction/regconiction.dart';
+import 'package:Valerian/ultis/appEnum.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert' as convert;
@@ -82,6 +83,7 @@ class _BLuetoothDiscoverState extends State<BLuetoothDiscover> {
   BluetoothBloc _bluetoothBloc;
   Recognition recognition;
   bool captured = false;
+  
   _BLuetoothDiscoverState() {
     this._bluetoothBloc = new BluetoothBloc();
     this.recognition = new Recognition();
@@ -100,6 +102,19 @@ class _BLuetoothDiscoverState extends State<BLuetoothDiscover> {
       body: SingleChildScrollView(
               child: Column(
           children: <Widget>[
+            FloatingActionButton(
+              backgroundColor: Colors.green,
+              child: Text("Rescan"),
+              onPressed: (){
+                _bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
+              }),
+
+              FloatingActionButton(
+              backgroundColor: Colors.red,
+              child: Text("STOP SACAN"),
+              onPressed: (){
+                _bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.STOP_SCAN);
+              }),
             // SwitchListTile(
             //   title: Text('Enable Bluetooth'),
             //   value: _bluetoothState.isEnabled,
