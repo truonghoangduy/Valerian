@@ -6,12 +6,12 @@
 // #include <BLE2902.h>
 #include <camera_pins.h>
 #include <esp_camera.h>
-#include <http_server_linker.h>
-#include <ArduinoJson.h>
-#include <SPIFFS.h>
+// #include <http_server_linker.h>
+// #include <ArduinoJson.h>
+// #include <SPIFFS.h>
 // #include <WiFi.h>
 // #include <ESPmDNS.h>
-#include <esp_http_server.h>
+// #include <esp_http_server.h>
 #include "soc/soc.h" //disable brownout problems
 #include "soc/rtc_cntl_reg.h"
 
@@ -25,51 +25,65 @@
 #endif
 
 const char *filename = "/config.json"; // SPIFFS config file
-<<<<<<< HEAD
-char *ssid = "NguyenDieuLinh";
-char *password = "0937437499";
+char *ssid = "HSU_Students";
+char *password = "dhhs12cnvch";
+BluetoothSerial SerialBT;
+camera_fb_t *fb = NULL;
+uint8_t  buffer= NULL;
 
-// BLE Section
-#define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-};
-void initBluetoothSerial()
->>>>>>> ba7a39622c03ae1a42e6848fdd95a1bd2235db05
+enum BLUE_MESSAGE
 {
-  if (!SerialBT.begin("valarian-sight"))
-  {
-    Serial.println("Bluetooth Serial not Init");
-    ESP.restart();
-  else
-  {
-    Serial.println("Bluetooth Serial Initalized");
-  }
-  // blueSerial.register_callback()
-}
+
+};
 void writeSerialBT(camera_fb_t *fb)
 {
+
+//     for (size_t i = 0; i < fb->len; i++)
+//   {
+
+//     buffer = *(fb->buf + i);
+// // #ifdef DEBUG_MODE
+// //     Serial.print((char)buffer);
+// //     Serial.print(" ");
+// // #endif
+//     // pCharacteristic->setValue(&buffer,1);
+//     // pCharacteristic->notify();
+//     SerialBT.write(&buffer,1);
+//       // SerialBT.flush();
+//     delay(5);
+//   }
   SerialBT.write(fb->buf, fb->len); // Queue package alreay implemented
   SerialBT.flush();
-}
 
+  if (SerialBT.getWriteError() == 1)
+  {
+    Serial.println("Fail to send");
+    SerialBT.write(fb->buf, fb->len); // Queue package alreay implemented
+    SerialBT.flush();
+  }
+}
 
 // esp_spp_cb_event_t Enum for Bluetooth SerialCallBack type
-void blueCallBack(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
-{
-  if (event == ESP_SPP_OPEN_EVT)
-  {
-    /* code */
-  }
-  else if (event = ESP_SPP_DATA_IND_EVT) // client send request
-  {
-    // param->data_ind.data
-    String messege = String(*param->data_ind.data); // * *uint8_t => char
-    Serial.println(messege);
-  }
-}
+// void blueCallBack(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
+// {
+//   if (event == ESP_SPP_OPEN_EVT)
+//   {
+//     /* code */
+//   }
+//   else if (event = ESP_SPP_DATA_IND_EVT) // client send request
+//   {
+//     // param->data_ind.data
+//     String messege = String(*param->data_ind.data); // * *uint8_t => char
+//     Serial.println(messege);
+//   }
+// }
+
 void capture()
 {
-  camera_fb_t *fb = NULL;
+
   esp_err_t res = ESP_OK;
+  // digitalWrite(4, HIGH);
+  // delay(100);
   fb = esp_camera_fb_get();
   if (!fb)
   {
@@ -81,7 +95,7 @@ void capture()
   {
     return;
   }
-
+  // digitalWrite(4, LOW);
   writeSerialBT(fb);
   esp_camera_fb_return(fb);
 }
@@ -103,7 +117,7 @@ void setCameraParam(int paramInt)
     break;
 
   case 1:
-    s->set_framesize(s, FRAMESIZE_SVGA);
+    s->set_framesize(s, FRAMESIZE_CIF);
     break;
 
   case 0:
@@ -114,7 +128,6 @@ void setCameraParam(int paramInt)
 
   capture();
 }
-
 
 void btCallback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 {
@@ -134,6 +147,12 @@ void btCallback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 
 void initBT()
 {
+  if (SerialBT.available() == 1)
+  {
+    Serial.println("Alrealy Stuck on Bluetooth Serial");
+    SerialBT.end();
+  }
+  
   if (!SerialBT.begin("Valerian-Sight"))
   {
     Serial.println("An error occurred initializing Bluetooth");
@@ -143,66 +162,49 @@ void initBT()
   {
     Serial.println("Bluetooth initialized");
   }
-
   SerialBT.register_callback(btCallback);
   Serial.println("The device started, now you can pair it with bluetooth");
 }
-
-<<<<<<< HEAD
-void sendFakeData()
+void setup()
 {
-  pCharacteristic->setValue(&value, 4);
-  pCharacteristic->notify();
-  delay(1000);
-  value++;
-}
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
 
-void turnOnWifiMode()
-{
-  // Serial.println("Init Cam Sussesfully");
-  // WiFi.mode(WIFI_STA);
+  Serial.begin(115200);
+  Serial.setDebugOutput(true);
+  Serial.println("Hello World");
+  Serial.print("Heap");
+  Serial.println(ESP.getFreeHeap());
+  // pinMode(4, OUTPUT);
+  initBT();
 
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.println("WiFi connected");
-
-  delay(400);
-
-  // if (!MDNS.begin("valerian"))
-  // {
-  //   Serial.println("Error setting up MDNS responder!");
-  //   delay(300);
-  digitalWrite(22, LOW);
->>>>>>> ba7a39622c03ae1a42e6848fdd95a1bd2235db05
+  initCamera_Config();
+  delay(500);
 
   esp_err_t err = esp_camera_init(&camera_config);
   if (err != ESP_OK)
   {
+    Serial.printf("Camera init failed with error 0x%x", err);
     return;
   }
   Serial.print("Heap Init CAM config");
   Serial.println(ESP.getFreeHeap());
   Serial.println("Init Cam Sussesfully");
-  initBT();
+  
 }
 
 void loop()
 {
-<<<<<<< HEAD
-  // sendFakeData();
-  // if (digitalRead(4) == HIGH)
-  // {
-  //   if (buttonActive == false)
-  //   {
-
-  //     buttonActive = true;
-  //     buttonTimer = millis();
-  //   }
-
-  //   if ((millis() - buttonTimer > longPressTime) && (longPressActive == false))
 }
+
+//   for (size_t i = 0; i < fb->len; i++)
+//   {
+
+//     buffer = *(fb->buf + i);
+// #ifdef DEBUG_BUFFER
+//     Serial.print(buffer);
+//     Serial.print(" ");
+// #endif
+//     pCharacteristic->setValue(&buffer,1);
+//     pCharacteristic->notify();
+//     delay(70);
+//   }
