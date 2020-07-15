@@ -1,8 +1,5 @@
 {
-    "terminal.integrated.env.osx": {
-        "PATH": "/Users/hoangduy/.platformio/penv/bin:/Users/hoangduy/.platformio/penv:/Users/hoangduy/google-cloud-sdk/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/hoangduy/Developer/flutter/bin",
-        "PLATFORMIO_CALLER": "vscode"
-    },
+    "C_Cpp.errorSquiggles": "Disabled",
     "files.associations": {
         "string": "cpp"
     }
