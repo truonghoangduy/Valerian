@@ -1,10 +1,7 @@
 import 'dart:ffi';
 import 'dart:typed_data';
 // import 'dart:typed_data';
-import 'package:Valerian/bloc/blue_serial_v2.dart';
 import 'package:Valerian/regconiction/regconiction.dart';
-import 'package:Valerian/ultis/appEnum.dart';
-import 'package:Valerian/ultis/bluetooth_exception.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:async';
@@ -21,7 +18,7 @@ const TEXT = 1; // Normal String
 const DECTION = 2; // Encoding for sendback object dection
 
 // }
-class BluetoothBloc {
+class BluetoothBlocV2 {
   BluetoothConnection connectionSight; // Connection BOARD INFO
   BluetoothConnection connectionDisplay;
 
@@ -44,15 +41,14 @@ class BluetoothBloc {
       new StreamController<int>.broadcast();
   // _pictureController.
   bool turnOnFristTimeFlag = false;
-  BluetoothBloc() {
+  BluetoothBlocV2() {
     // scanLoopForDevices();
     // _pictureController.stream.listen((event) {
     //   print("Stream listenner");
     //   print(event);
     // });
-    _timer2 = new RestartableTimer(Duration(seconds: 1), () => {print("TICK")});
-    this.listForScanFlagV1();
   }
+  
 
   void handleImageCallBack(Uint8List data) {
     if (data.length == 1 && data.first == 255) {
@@ -103,7 +99,6 @@ class BluetoothBloc {
       connectionSight.input.listen(handleImageCallBack).onDone(() {
         print("LOST Connection TO : " + BOARD_NAME_SIGHT);
         cleenUpResoruce(BOARD_NAME_SIGHT);
-        this.scanFlag.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
       });
       connectingState++;
     }
@@ -259,93 +254,9 @@ class BluetoothBloc {
     });
   }
 
-  BehaviorSubject<BLUETOOTH_SCAN_STATE> scanFlag = new BehaviorSubject<BLUETOOTH_SCAN_STATE>();
-  int deviceCounter = 0;
-
-  listForScanFlagV1() {
-    this.scanFlag.stream.listen((event)async {
-      print(event);
-      if (event == BLUETOOTH_SCAN_STATE.RE_SCAN) {
-        this.scanDevicesV1();
-      }else if(event == BLUETOOTH_SCAN_STATE.STOP_SCAN){
-        await this.scaningSubscripption?.pause();
-        await FlutterBluetoothSerial.instance.cancelDiscovery();
-      }
-    });
-  }
-
-  bool deviceConnectionFilter() {
-    // deviceCounter = 0;
-    // if (this.connectionDisplay?.isConnected != null) {
-    //   deviceCounter++;
-    // }
-    // if (this.connectionDisplay?.address != null) {
-    //   deviceCounter++;
-    // }
-    // if (deviceCounter == DEVICE_DEBUG) {
-    //   return true;
-    // }
-    // return false;
-  }
-
-  bool deviceScanFilter() {
-    deviceCounter = 0;
-    if (this.deviceDisplay?.address != null) {
-      deviceCounter++;
-    }
-    if (this.deviceSight?.address != null) {
-      deviceCounter++;
-    }
-    if (deviceCounter == DEVICE_DEBUG) {
-      return true;
-    }
-    return false;
-  }
-
-  scanDevicesV1() async {
-    print("ReScan");
-    // // return true;
-    var scaning = FlutterBluetoothSerial.instance.startDiscovery();
-    this.scaningSubscripption = scaning.listen((element) async {
-      print(element.device.name != null
-          ? element.device.name
-          : element.device.address);
-      if (element.device.name != null) {
-        if (element.device.name == BOARD_NAME_SIGHT) {
-          this.deviceSight = element.device;
-          deviceCounter++;
-        }
-        if (element.device.name == BOARD_NAME_DISPLAY) {
-          this.deviceDisplay = element.device;
-          deviceCounter++;
-        }
-      }
-      print('Match Counter ${deviceCounter.toString()}');
-      if (this.deviceScanFilter()) {
-        print("Find Total Devices");
-        await FlutterBluetoothSerial.instance.cancelDiscovery();
-      }
-    });
-    this.scaningSubscripption.onDone(() async {
-      print("Stop Scanning");
-      if (this.deviceScanFilter()) {
-        print("Found Total Devoices");
-        if (await this.connectToDevice()) {
-          
-        }else{
-          throw BluetoothException(message: "Cannot Connect To DEVICES");
-        }
-        // TO DO Implement for each Devices lost connection
-        // SECTION FOR CONNECT TO DEVICE
-      } else {
-        await FlutterBluetoothSerial.instance.cancelDiscovery();
-        this.scanFlag.sink.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
-      }
-    });
-  }
-
   Future<bool> scanDevices() async {
-    return true;
+    // // return true;
+    // int deviceCounter = 0;
     // var scaning = FlutterBluetoothSerial.instance.startDiscovery();
     // // this.scaningSubscripption.onDone(() {
     // //    print("object"); });
@@ -373,42 +284,43 @@ class BluetoothBloc {
     //   if (deviceCounter == 3) {
     //     print("Found Total Devoices");
     //   } else {
-    //     this.scanFlag.add(true);
+    //     await this.scanDevices();
     //   }
     // });
 
-    // // Lib automatomaticly close the Stream
-    // // await scaning.forEach((element) {
-    // //   if (element.device.name == BOARD_NAME_SIGHT) {
-    // //     this.deviceSight = element.device;
-    // //     deviceCounter++;
-    // //   }
-    // //   if (element.device.name == BOARD_NAME_DISPLAY) {
-    // //     this.deviceDisplay = element.device;
-    // //     deviceCounter++;
-    // //   }
-    // // });
+    // Lib automatomaticly close the Stream
+    // await scaning.forEach((element) {
+    //   if (element.device.name == BOARD_NAME_SIGHT) {
+    //     this.deviceSight = element.device;
+    //     deviceCounter++;
+    //   }
+    //   if (element.device.name == BOARD_NAME_DISPLAY) {
+    //     this.deviceDisplay = element.device;
+    //     deviceCounter++;
+    //   }
+    // });
 
-    // // BluetoothDiscoveryResult scanResult = await scaning
-    // // //     .firstWhere((element) => element.device.name == BOARD_NAME_SIGHT);
-    // // this.deviceSight = scanResult.device;
+    // BluetoothDiscoveryResult scanResult = await scaning
+    // //     .firstWhere((element) => element.device.name == BOARD_NAME_SIGHT);
+    // this.deviceSight = scanResult.device;
     // if (deviceCounter >= DEVICE_DEBUG) {
     //   // await Future.delayed(Duration(seconds: 2)); // UI THINGSYYY
     //   return true;
     // } else {
     //   return false;
     // }
-    // return true;
+    return true;
   }
 
-  establishConnectionToDevice(String deviceName) {}
+
+  establishConnectionToDevice(String deviceName){
+
+  }
 
 
-  Future<BluetoothDevice> scanDeviceWithName(String deviceName) async {
+  Future<BluetoothDevice> scanDeviceWithName(String deviceName) async{
     try {
-      var discoveryResult = await FlutterBluetoothSerial.instance
-          .startDiscovery()
-          .firstWhere((element) => element.device.name == deviceName);
+      var discoveryResult = await FlutterBluetoothSerial.instance.startDiscovery().firstWhere((element) => element.device.name == deviceName);
       return discoveryResult.device;
     } catch (e) {
       print(e);
@@ -416,6 +328,3 @@ class BluetoothBloc {
     }
   }
 }
-
-// BluetoothDiscoveryResult scanResult = await scaning
-//     .firstWhere((element) => element.device.name == BOARD_NAME_SIGHT);

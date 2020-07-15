@@ -1,5 +1,8 @@
+import 'dart:ffi';
+
 import 'package:Valerian/bloc/blue_serial.dart';
 import 'package:Valerian/regconiction/regconiction.dart';
+import 'package:Valerian/ultis/appEnum.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert' as convert;
@@ -22,7 +25,7 @@ class _DetectionState extends State<Detection> {
   _DetectionState() {}
   @override
   Widget build(BuildContext context) {
-    String path = "";
+    String path = "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRaXQvw-ZZQOpY1h-wC5hYRvodgyz5iLTXo8FgyQAZjgUjEXA1k&usqp=CAU";
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -80,6 +83,7 @@ class _BLuetoothDiscoverState extends State<BLuetoothDiscover> {
   BluetoothBloc _bluetoothBloc;
   Recognition recognition;
   bool captured = false;
+  
   _BLuetoothDiscoverState() {
     this._bluetoothBloc = new BluetoothBloc();
     this.recognition = new Recognition();
@@ -98,42 +102,32 @@ class _BLuetoothDiscoverState extends State<BLuetoothDiscover> {
       body: SingleChildScrollView(
               child: Column(
           children: <Widget>[
-            SwitchListTile(
-              title: Text('Enable Bluetooth'),
-              value: _bluetoothState.isEnabled,
-              onChanged: (bool value) async {
-                if (value) {
-                  await FlutterBluetoothSerial.instance.requestEnable();
-                  var vaule = await FlutterBluetoothSerial.instance.isAvailable;
-                  print(vaule);
-                } else {
-                  await FlutterBluetoothSerial.instance.requestDisable();
-                }
-              },
-            ),
-            // StreamBuilder<BluetoothDiscoveryResult>(
-            //   stream: FlutterBluetoothSerial.instance.startDiscovery(),
-            //   builder: (BuildContext context,AsyncSnapshot<BluetoothDiscoveryResult> snapshot){
-            //     if (snapshot.hasData && snapshot.data.device.address !=null && snapshot.data.device.name == BOARD_NAME) {
-            //       if (snapshot.data.device.name == BOARD_NAME) {
-            //         print("Find Ya");
-            //         return Container(
-            //         color: Colors.yellowAccent,
-            //         width: 100,
-            //         height: 100,
-            //         child:Text(snapshot.data.device.name!=null?snapshot.data.device.name:snapshot.data.device.address),
+            FloatingActionButton(
+              backgroundColor: Colors.green,
+              child: Text("Rescan"),
+              onPressed: (){
+                _bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
+              }),
 
-            //       );
-            //       }
-
-            //     }else{
-            //       return Container(
-            //         color: Colors.blueAccent,
-            //         width: 100,
-            //         height: 100,
-            //       );
+              FloatingActionButton(
+              backgroundColor: Colors.red,
+              child: Text("STOP SACAN"),
+              onPressed: (){
+                _bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.STOP_SCAN);
+              }),
+            // SwitchListTile(
+            //   title: Text('Enable Bluetooth'),
+            //   value: _bluetoothState.isEnabled,
+            //   onChanged: (bool value) async {
+            //     if (value) {
+            //       await FlutterBluetoothSerial.instance.requestEnable();
+            //       var vaule = await FlutterBluetoothSerial.instance.isAvailable;
+            //       print(vaule);
+            //     } else {
+            //       await FlutterBluetoothSerial.instance.requestDisable();
             //     }
-            // })
+            //   },
+            // ),
             FutureBuilder<bool>(
                 future: this._bluetoothBloc.scanDevices(),
                 initialData: false,
@@ -153,6 +147,10 @@ class _BLuetoothDiscoverState extends State<BLuetoothDiscover> {
                     // child: ble_scaning,
                   );
                 }),
+
+            FloatingActionButton(onPressed: ()=>{
+              this._bluetoothBloc.scanLoopForDevices()
+            },),
             FloatingActionButton(
               onPressed: () async {
                 if (await this._bluetoothBloc.connectToDevice()) {
@@ -171,23 +169,54 @@ class _BLuetoothDiscoverState extends State<BLuetoothDiscover> {
                 child: Text("Capture"),
               ),
               onPressed: () async{
-               await this._bluetoothBloc.sending();
+               await this._bluetoothBloc.invokeCAMERA();
             }),
             FloatingActionButton(
               // child: ,
 
               onPressed: () => {
                 setState(() {
-                  this.captured = true;
+                  this.captured = !this.captured;
                 })
               },
               backgroundColor: Colors.yellow,
             ),
 
             this.captured
-                ? Image.memory(
-                    // Uint8List.fromList(this._bluetoothBloc.image)
-                    this._bluetoothBloc.pictureformBuffer)
+                ? Column(
+                  children: <Widget>[
+                    Image.memory(
+                        // Uint8List.fromList(this._bluetoothBloc.image)
+                        this._bluetoothBloc.pictureformBuffer),
+                    FutureBuilder<List<dynamic>>(
+                      future:Recognition.objectDection_V2_BlueSerial(this._bluetoothBloc.pictureformBuffer),
+                      builder: (context,snap){
+                      if (snap.data != null) {
+                      print(snap.data);
+                      return Column(
+                        children: <Widget>[
+                          // Image.network(path),
+                          Image.memory(Recognition.temper),
+
+                          Container(
+                            width: 200,
+                            height: 200,
+                            child: Text(
+                              snap.data[0]['detectedClass'] +
+                                  ": " +
+                                  snap.data[0]['confidenceInClass'].toString(),
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          ),
+                        ],
+                        // color:Colors.blueAccent
+                      );
+                    } else {
+                      return Container(color: Colors.black);
+                    }
+                    },)
+                  ],
+                )
                 : Container(
                     color: Colors.black,
                     width: 100,

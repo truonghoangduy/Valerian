@@ -1,0 +1,403 @@
+Executing task: platformio device monitor <
+
+--- Available filters and text transformations: colorize, debug, default, direct, esp32_exception_decoder, hexlify, log2file, nocontrol, printable, send_on_enter, time
+--- More details at http://bit.ly/pio-monitor-filters
+--- Miniterm on /dev/cu.usbserial-A50285BI  115200,8,N,1 ---
+--- Quit: Ctrl+C | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H ---
+ets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0018,len:4
+load:0x3fff001c,len:1044
+load:0x40078000,len:8896
+load:0x40080400,len:5828
+entry 0x400806ac
+�Hello World
+Heap258088
+Has PSRAM
+[E][camera.c:1049] camera_probe(): Detected camera not supported.
+[E][camera.c:1249] esp_camera_init(): Camera probe failed with error 0x20004
+Camera init failed with error 0x20004ets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0018,len:4
+load:0x3fff001c,len:1044
+load:0x40078000,len:8896
+load:0x40080400,len:5828
+entry 0x400806ac
+Hello World
+Heap258088
+Has PSRAM
+Bluetooth initialized
+The device started, now you can pair it with bluetooth
+Init Cam Sussesfully
+Client Connected!
+Client Connected!
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 17140
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 12160
+Last bit check25  :  34
+Picture lenght : 24086
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 7040
+Last bit check124  :  211
+Picture lenght : 34935
+Last bit check255  :  217
+Begin Send
+[E][BluetoothSerial.cpp:137] _spp_queue_packet(): SPP TX Packet Malloc Failed!
+Malloocoo Failll
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 27074
+Last bit check255  :  217
+Begin Send
+[E][BluetoothSerial.cpp:137] _spp_queue_packet(): SPP TX Packet Malloc Failed!
+Malloocoo Failll
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 3200
+Last bit check175  :  37
+Picture lenght : 57020
+Last bit check255  :  217
+Begin Send
+[E][BluetoothSerial.cpp:137] _spp_queue_packet(): SPP TX Packet Malloc Failed!
+Malloocoo Failll
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 8320
+Last bit check175  :  52
+Picture lenght : 54076
+Last bit check255  :  217
+Begin Send
+[E][BluetoothSerial.cpp:137] _spp_queue_packet(): SPP TX Packet Malloc Failed!
+Malloocoo Failll
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 24320
+Last bit check210  :  195
+Picture lenght : 43578
+Last bit check255  :  217
+Begin Send
+[E][BluetoothSerial.cpp:137] _spp_queue_packet(): SPP TX Packet Malloc Failed!
+Malloocoo Failll
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 2560
+Last bit check111  :  221
+Picture lenght : 41600
+Last bit check172  :  140
+Picture lenght : 19601
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 25748
+Last bit check255  :  217
+Begin Send
+[E][BluetoothSerial.cpp:137] _spp_queue_packet(): SPP TX Packet Malloc Failed!
+Malloocoo Failll
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 21760
+Last bit check226  :  59
+Picture lenght : 40955
+Last bit check255  :  217
+Begin Send
+[E][BluetoothSerial.cpp:137] _spp_queue_packet(): SPP TX Packet Malloc Failed!
+Malloocoo Failll
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 27115
+Last bit check255  :  217
+Begin Send
+[E][BluetoothSerial.cpp:137] _spp_queue_packet(): SPP TX Packet Malloc Failed!
+Malloocoo Failll
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 12160
+Last bit check21  :  186
+Picture lenght : 31166
+Last bit check255  :  217
+Begin Send
+[E][BluetoothSerial.cpp:137] _spp_queue_packet(): SPP TX Packet Malloc Failed!
+Malloocoo Failll
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 25600
+Last bit check140  :  199
+Picture lenght : 38916
+Last bit check255  :  217
+Begin Send
+[E][BluetoothSerial.cpp:137] _spp_queue_packet(): SPP TX Packet Malloc Failed!
+Malloocoo Failll
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 26240
+Last bit check135  :  113
+Picture lenght : 36979
+Last bit check255  :  217
+Begin Send
+[E][BluetoothSerial.cpp:137] _spp_queue_packet(): SPP TX Packet Malloc Failed!
+Malloocoo Failll
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=385
+
+Original : 0
+Picture lenght : 19840
+Last bit check38  :  80
+Picture lenght : 61440
+Last bit check79  :  143
+Picture lenght : 16274
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+
+--- exit ---
+Exception in thread rx:
+Traceback (most recent call last):
+  File "/Users/hoangduy/.platformio/penv/lib/python3.7/site-packages/serial/serialposix.py", line 493, in read
+    buf = os.read(self.fd, size - len(read))
+OSError: [Errno 6] Device not configured
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/local/Cellar/python/3.7.5/Frameworks/Python.framework/Versions/3.7/lib/python3.7/threading.py", line 926, in _bootstrap_inner
+    self.run()
+  File "/usr/local/Cellar/python/3.7.5/Frameworks/Python.framework/Versions/3.7/lib/python3.7/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "/Users/hoangduy/.platformio/penv/lib/python3.7/site-packages/serial/tools/miniterm.py", line 445, in reader
+    data = self.serial.read(self.serial.in_waiting or 1)
+  File "/Users/hoangduy/.platformio/penv/lib/python3.7/site-packages/serial/serialposix.py", line 509, in read
+    raise SerialException('read failed: {}'.format(e))
+serial.serialutil.SerialException: read failed: [Errno 6] Device not configured
+
+
+Terminal will be reused by tasks, press any key to close it.
+
+> Executing task: platformio device monitor <
+
+--- Available filters and text transformations: colorize, debug, default, direct, esp32_exception_decoder, hexlify, log2file, nocontrol, printable, send_on_enter, time
+--- More details at http://bit.ly/pio-monitor-filters
+--- Miniterm on /dev/cu.usbserial-A50285BI  115200,8,N,1 ---
+--- Quit: Ctrl+C | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H ---
+ets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0018,len:4
+load:0x3fff001c,len:1044
+load:0x40078000,len:8896
+load:0x40080400,len:5828
+entry 0x400806ac
+Hello World
+Heap258184
+Has PSRAM
+Bluetooth initialized
+The device started, now you can pair it with bluetooth
+Init Cam Sussesfully
+Client Connected!
+ESP_SPP_DATA_IND_EVT len=1, handle=129
+
+Original : 0
+Picture lenght : 9120
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=129
+
+Original : 0
+Picture lenght : 1280
+Last bit check80  :  1
+Picture lenght : 61440
+Last bit check180  :  160
+Picture lenght : 9215
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=129
+
+Original : 0
+Picture lenght : 2560
+Last bit check194  :  10
+Picture lenght : 17101
+Last bit check217  :  0
+Picture lenght : 7558
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=129
+
+Original : 0
+Picture lenght : 7040
+Last bit check24  :  98
+Picture lenght : 10070
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=129
+
+Original : 0
+Picture lenght : 5760
+Last bit check232  :  36
+Picture lenght : 13811
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=129
+
+Original : 0
+Picture lenght : 5120
+Last bit check160  :  2
+Picture lenght : 11366
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=129
+
+Original : 0
+Picture lenght : 8320
+Last bit check148  :  81
+Picture lenght : 61440
+Last bit check146  :  139
+Picture lenght : 7497
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=129
+
+Original : 0
+Picture lenght : 1920
+Last bit check1  :  51
+Picture lenght : 13581
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=129
+
+Original : 0
+Picture lenght : 7680
+Last bit check126  :  56
+Picture lenght : 15874
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x3 (DOWNLOAD_BOOT(UART0/UART1/SDIO_REI_REO_V2))
+waiting for download
+ets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0018,len:4
+load:0x3fff001c,len:1044
+load:0x40078000,len:8896
+load:0x40080400,len:5828
+entry 0x400806ac
+�Hello World
+Heap258184
+Has PSRAM
+Bluetooth initialized
+The device started, now you can pair it with bluetooth
+Init Cam Sussesfully
+Client Connected!
+ESP_SPP_DATA_IND_EVT len=1, handle=129
+
+Original : 0
+Picture lenght : 9704
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=129
+
+Original : 0
+Picture lenght : 7680
+Last bit check150  :  198
+Picture lenght : 43602
+Last bit check255  :  217
+Begin Send
+[E][BluetoothSerial.cpp:137] _spp_queue_packet(): SPP TX Packet Malloc Failed!
+Malloocoo Failll
+OK Sending
+Done queue of bluetooth
+ESP_SPP_DATA_IND_EVT len=1, handle=129
+
+Original : 0
+Picture lenght : 16000
+Last bit check104  :  187
+Picture lenght : 21191
+Last bit check255  :  217
+Begin Send
+OK Sending
+Done queue of bluetooth
