@@ -14,10 +14,10 @@
 // #include <esp_http_server.h>
 #include "soc/soc.h" //disable brownout problems
 #include "soc/rtc_cntl_reg.h"
-
+#include "OneButton.h"
+#define INPUT_PINS 15
 #include "display.h"
-
-
+OneButton oneButton(INPUT_PINS, false, false);
 
 // Swithover Bluetooth Serial on Android
 #include "BluetoothSerial.h"
@@ -37,34 +37,34 @@ const char *filename = "/config.json"; // SPIFFS config file
 char *ssid = "NguyenDieuLinh";
 char *password = "0937437499";
 BluetoothSerial SerialBT;
+
 char stop = '\n';
 
-enum text 
+enum Board_State
 {
   NOTIFICATION,
   TEXT,
   DECTION
-};
-typedef enum text text;
+} Board_State;
 
 void displayConfig(String mesges, int opCode)
 {
-  
-  if (opCode == NOTIFICATION)
-    {
-        Serial.printf("Hello\n");
-        Serial.println(mesges);
-        showDisplay();
-    }
-    else if (opCode == TEXT)
-    {
-        Serial.printf("Me may\n");    
-    }
-    else if (opCode == DECTION)
-    {
-        Serial.printf("Fuck u\n");
-    }
 
+  if (opCode == NOTIFICATION)
+  {
+    Serial.printf("Hello\n");
+    Serial.println(mesges);
+    showDisplay(mesges);
+    // showDisplay();
+  }
+  else if (opCode == TEXT)
+  {
+    Serial.printf("Me may\n");
+  }
+  else if (opCode == DECTION)
+  {
+    Serial.printf("Fuck u\n");
+  }
 }
 
 void btCallback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
@@ -80,20 +80,18 @@ void btCallback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
     // int paramInt = stringRead.toInt() - 48;
     // Serial.printf("paramInt: %d\n", paramInt);
     String mesges = SerialBT.readStringUntil(stop);
-        // mesges.remove()
-        int opCode = ((String)mesges.charAt(0)).toInt();
+    // mesges.remove()
+    int opCode = ((String)mesges.charAt(0)).toInt();
 
-        displayConfig(mesges.substring(1), opCode);
+    displayConfig(mesges.substring(1), opCode);
     // testdrawtext((char *)mesges.c_str(),ST7735_WHITE);
     // Serial.println((char *)param->data_ind.data);   // setCameraParam(paramInt);
   }
 }
 
-
-
 void initBT()
 {
-  if (!SerialBT.begin("Valerian-Sight-test"))
+  if (!SerialBT.begin("Valerian-Display"))
   {
     Serial.println("An error occurred initializing Bluetooth");
     ESP.restart();
@@ -106,25 +104,44 @@ void initBT()
   SerialBT.register_callback(btCallback);
   Serial.println("The device started, now you can pair it with bluetooth");
 }
+void callBackLongPressStop()
+{
 
-void setup() {
+  Serial.println("hello");
+  Serial.println(sizeof(DECTION));
+  if (SerialBT.hasClient())
+  {
+    SerialBT.write((uint8_t *)DECTION, sizeof(DECTION));
+  }
+}
+void callBackDuringLongPressStop()
+{
+
+  Serial.println("callBackDuringLongPressStop");
+}
+
+void setup()
+{
   Serial.begin(115200);
   // SerialBT.begin("ESP32test"); //Bluetooth device name
-    Serial.setDebugOutput(true);
+  Serial.setDebugOutput(true);
+
+  pinMode(INPUT_PINS, OUTPUT);
 
   // Serial.println("The device started, now you can pair it with bluetooth!");
   displaysetup();
-  showDisplay();
-  delay(2000);
-  // initBT();
+  // showDisplay();
+  // delay(2000);
+  initBT();
+  oneButton.setDebounceTicks(2000);
+  oneButton.setPressTicks(2000);
+  oneButton.attachLongPressStop(callBackLongPressStop);
+  // oneButton.attachDuringLongPress(callBackLongPressStop);
 }
 
-
-
-
-
-
-void loop() {
+void loop()
+{
+  oneButton.tick();
   // tft.invertDisplay(true);
   // delay(2000);
   // tft.invertDisplay(false);
@@ -139,10 +156,6 @@ void loop() {
   // //   delay(300);
   // }
   // delay(20);
-
-
-
-
 }
 
 // enum BLUE_MESSAGE
@@ -167,7 +180,6 @@ void loop() {
 //   SerialBT.write(fb->buf, fb->len); // Queue package alreay implemented
 //   SerialBT.flush();
 // }
-
 
 // // esp_spp_cb_event_t Enum for Bluetooth SerialCallBack type
 // void blueCallBack(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
@@ -232,7 +244,6 @@ void loop() {
 //   capture();
 // }
 
-
 // void btCallback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
 // {
 //   if (event == ESP_SPP_SRV_OPEN_EVT)
@@ -264,9 +275,6 @@ void loop() {
 //   SerialBT.register_callback(btCallback);
 //   Serial.println("The device started, now you can pair it with bluetooth");
 // }
-
-
-
 
 // void handleMessage(String message)
 // {

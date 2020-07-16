@@ -3,12 +3,13 @@
 #include "SPI.h"
 #include "dishplaySetUp.h"
 #include "TFT_eSPI.h"
-#include "bitPicture.h"
+// #include "bitPicture.h"
 #include "strings.h"
 
 TFT_eSPI tft = TFT_eSPI();
 
-#include <Fonts/miror20pt7bBitmaps.h>
+// #include <Fonts/miror20pt7bBitmaps.h>
+#include <Fonts/miror10pt7b.h>
 
 // const GFXfont myfont PROGMEM ={
 // 	(uint8_t *)25537_miror20pt7b
@@ -20,7 +21,7 @@ void displaysetup()
 {
 	tft.init();
 	tft.begin();
-	tft.setRotation(3);
+	tft.setRotation(1);
 }
 void testdrawrects(uint16_t color)
 {
@@ -41,7 +42,7 @@ void testfillrects(uint16_t color1, uint16_t color2)
 	}
 }
 
-void showDisplay()
+void showDisplay(String message)
 {
 	
 
@@ -59,22 +60,23 @@ void showDisplay()
 
 	// delay(3000);
 
-	tft.setFreeFont(&miror20pt7b);
-	tft.setTextSize(1);
+	tft.setFreeFont(&miror10pt7b);
+	tft.setTextSize(0);
+
 	int start = 0;
-	int end = Variablel.length();
+	int end = message.length();
 
 	char revesttext[end];
 
 	for (int i = end - 1; i > -1; i--)
 	{
-		Serial.println(Variablel.charAt(i));
-		revesttext[start] = Variablel.charAt(i);
+		Serial.println(message.charAt(i));
+		revesttext[start] = message.charAt(i);
 		Serial.println(revesttext[start]);
 		start += 1;
 	}
 	Serial.println((char *)revesttext);
-	revesttext[end] = '\0';
+	revesttext[end] = '\0'; // ARHHHHH !!! THE BUGGG IS FOUND
 
 	Serial.println((char *)revesttext);
 	tft.setCursor(15,40);
