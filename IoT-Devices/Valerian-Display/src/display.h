@@ -117,6 +117,8 @@ void showDisplay(String message)
 	// }
 	
 	tft.println(revesttext);
+
+	//hello my name end game---------------------------------------------------------------------------------
 	
 	// tft.setCursor(10, 20);
 
