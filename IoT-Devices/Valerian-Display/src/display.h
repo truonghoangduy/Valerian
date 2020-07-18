@@ -22,25 +22,9 @@ void displaysetup()
 	tft.init();
 	tft.begin();
 	tft.setRotation(1);
-}
-void testdrawrects(uint16_t color)
-{
 	tft.fillScreen(TFT_BLACK);
-	for (int16_t x = 0; x < 50; x += 6)
-	{
-		tft.drawRect(50 / 2 - x / 2, 50 / 2 - x / 2, x, x, color);
-		delay(100);
-	}
 }
-void testfillrects(uint16_t color1, uint16_t color2)
-{
-	tft.fillScreen(TFT_BLACK);
-	for (int16_t x = tft.width() - 1; x > 6; x -= 6)
-	{
-		tft.fillRect(tft.width() / 2 - x / 2, tft.height() / 2 - x / 2, x, x, color1);
-		tft.drawRect(tft.width() / 2 - x / 2, tft.height() / 2 - x / 2, x, x, color2);
-	}
-}
+
 
 void showDisplay(String message)
 {
@@ -60,13 +44,51 @@ void showDisplay(String message)
 
 	// delay(3000);
 
+	// tft.drawRoundRect(70, 0, 80, 80, 10, TFT_SILVER);
+	// tft.drawRect(70, 0, 80, 80, TFT_BLACK);
+	// int x0 = 30;
+	// int y0 = 40;
+	// int r = 25;
+	// for(int a = 18; a > 0; a--)
+	// {
+	// 	tft.drawCircle(x0, y0, r, 0x001F);
+	// 	delay(300);
+	// 	tft.fillCircle(x0, y0, r, 0xFFE0);
+	// 	delay(200);
+		
+	// }
+	// tft.fillScreen(TFT_BLACK);
+	
+	for(int b = 1; b < 8; b++)
+	{
+		tft.fillCircle(10, 40, 2, TFT_WHITE);
+		delay(100);
+		tft.fillCircle(20, 40, 2, TFT_WHITE);
+		delay(200);
+		tft.fillCircle(30, 40, 2, TFT_WHITE);
+		delay(300);
+		tft.fillScreen(TFT_BLACK);
+	}
+	
+		
+	
+	tft.fillScreen(TFT_RED);
+
+	tft.drawRoundRect(2, 2, 80, 80, 10, TFT_SILVER);
+
+	tft.fillRect(2, 0, 80, 80, TFT_BLACK);
+	tft.setTextWrap(false, true);
+
 	tft.setFreeFont(&miror10pt7b);
 	tft.setTextSize(0);
+	tft.setCursor(7,30);
 
 	int start = 0;
 	int end = message.length();
 
 	char revesttext[end];
+
+	
 
 	for (int i = end - 1; i > -1; i--)
 	{
@@ -79,8 +101,23 @@ void showDisplay(String message)
 	revesttext[end] = '\0'; // ARHHHHH !!! THE BUGGG IS FOUND
 
 	Serial.println((char *)revesttext);
-	tft.setCursor(15,40);
+	
+	
+	// while((message.indexOf(' ', start) >= 0) && (start <= message.length()))
+	// {
+	// 	end = message.indexOf(' ', start +1);
+	// 	uint16_t len = tft.textWidth(message.substring(start, end));
+	// 	if(tft.getCursorX() + len >= tft.width())
+	// 	{
+	// 		tft.println();
+	// 		start ++;
+	// 	}
+	// 	tft.println(message.substring(start, end));
+	// 	start = end;
+	// }
+	
 	tft.println(revesttext);
+	
 	// tft.setCursor(10, 20);
 
 	// tft.println(Variablel.reserve(30));
