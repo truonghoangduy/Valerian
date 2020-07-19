@@ -4,7 +4,7 @@
 // #include <http_server_linker.h>
 // #include <esp_http_server.h>
 // #include <ArduinoJson.h>
-#include <SPIFFS.h>
+// #include <SPIFFS.h>c
 #include "soc/soc.h" //disable brownout problems
 #include "soc/rtc_cntl_reg.h"
 // BOARD
@@ -17,7 +17,7 @@
 // #include "displayPins.h"
 
 uint8_t buffer;
-const char *filename = "/config.json"; // SPIFFS config file
+// const char *filename = "/config.json"; // SPIFFS config file
 // char *ssid = "HSU_Students";
 // char *password = "dhhs12cnvch";
 BluetoothSerial SerialBT;
@@ -232,7 +232,7 @@ void initBT()
 void setup()
 {
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
-
+  delay(200);
   Serial.begin(115200);
   Serial.setDebugOutput(true);
   Serial.println("Hello World");
@@ -249,7 +249,6 @@ void setup()
     return;
   }
   // initDisplay();
-
   initBT();
   Serial.println("Init Cam Sussesfully");
 }
