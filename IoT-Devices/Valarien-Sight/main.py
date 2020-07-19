@@ -1,5 +1,5 @@
 bytes_raw = []
-fin = open("data1.txt", "r")
+fin = open("data2.txt", "r")
 lines = fin.readlines()
 for line in lines:
     byte_line = line.split(' ')

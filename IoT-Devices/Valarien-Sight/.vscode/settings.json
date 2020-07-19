@@ -1,9 +1,18 @@
 {
-    "terminal.integrated.env.osx": {
-        "PATH": "/Users/hoangduy/.platformio/penv/bin:/Users/hoangduy/.platformio/penv:/Users/hoangduy/google-cloud-sdk/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/hoangduy/Developer/flutter/bin",
-        "PLATFORMIO_CALLER": "vscode"
-    },
     "files.associations": {
-        "string": "cpp"
-    }
+        "string": "cpp",
+        "sstream": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "initializer_list": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "*.tcc": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }
