@@ -103,7 +103,7 @@ class BluetoothBloc {
       connectionSight.input.listen(handleImageCallBack).onDone(() {
         print("LOST Connection TO : " + BOARD_NAME_SIGHT);
         cleenUpResoruce(BOARD_NAME_SIGHT);
-        this.scanFlag.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
+        this.scanFlag.sink.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
       });
       connectingState++;
     }
@@ -111,6 +111,7 @@ class BluetoothBloc {
       connectionDisplay.input.listen(handleDisplayCallBack).onDone(() {
         print("LOST Connection TO : " + BOARD_NAME_DISPLAY);
         cleenUpResoruce(BOARD_NAME_DISPLAY);
+        this.scanFlag.sink.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
       });
       connectingState++;
     }
@@ -272,20 +273,6 @@ class BluetoothBloc {
         await FlutterBluetoothSerial.instance.cancelDiscovery();
       }
     });
-  }
-
-  bool deviceConnectionFilter() {
-    // deviceCounter = 0;
-    // if (this.connectionDisplay?.isConnected != null) {
-    //   deviceCounter++;
-    // }
-    // if (this.connectionDisplay?.address != null) {
-    //   deviceCounter++;
-    // }
-    // if (deviceCounter == DEVICE_DEBUG) {
-    //   return true;
-    // }
-    // return false;
   }
 
   bool deviceScanFilter() {

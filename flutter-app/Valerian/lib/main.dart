@@ -29,7 +29,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-  await Recognition().loadModel();
+  // await Recognition().loadModel();
 
   runApp(FlutterBlueApp());
 }
