@@ -115,19 +115,6 @@ class _BLuetoothDiscoverState extends State<BLuetoothDiscover> {
               onPressed: (){
                 _bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.STOP_SCAN);
               }),
-            // SwitchListTile(
-            //   title: Text('Enable Bluetooth'),
-            //   value: _bluetoothState.isEnabled,
-            //   onChanged: (bool value) async {
-            //     if (value) {
-            //       await FlutterBluetoothSerial.instance.requestEnable();
-            //       var vaule = await FlutterBluetoothSerial.instance.isAvailable;
-            //       print(vaule);
-            //     } else {
-            //       await FlutterBluetoothSerial.instance.requestDisable();
-            //     }
-            //   },
-            // ),
             FutureBuilder<bool>(
                 future: this._bluetoothBloc.scanDevices(),
                 initialData: false,
@@ -144,7 +131,7 @@ class _BLuetoothDiscoverState extends State<BLuetoothDiscover> {
                     width: 200,
                     height: 200,
                     color: Colors.black38,
-                    // child: ble_scaning,
+                    child: ble_scaning,
                   );
                 }),
 
