@@ -34,9 +34,9 @@ void main() async {
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   // await Recognition().loadModel();
-  await GlobalVarible.initLib();
-  await GlobalVarible.initGobaleVarible();
-  GlobalVarible.checkAlreadyInitGobaleVarible();
+  await GlobalVarible().initLib();
+  await GlobalVarible().initGobaleVarible();
+  GlobalVarible().checkAlreadyInitGobaleVarible();
 
   runApp(FlutterBlueApp());
 }

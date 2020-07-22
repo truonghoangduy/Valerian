@@ -3,26 +3,36 @@ import 'dart:convert' as json;
 
 class GlobalVarible{
 
-  static const APP_GLOBLE_VARIBLE = "appGlobalVarible";
+  static final GlobalVarible _singleton = GlobalVarible._internal();
+
+  factory GlobalVarible() {
+    return _singleton;
+  }
+  GlobalVarible._internal();
+
+
+  static const String APP_GLOBLE_VARIBLE = "appGlobalVarible";
 
   static Map<String,bool> appGlobalVarible = {
     "dection":false,
     "notification":false,
   };
 
+  
 
-  static SharedPreferences sharedpreferenceslib;
 
-  static Future<void> initLib() async{
+  SharedPreferences sharedpreferenceslib;
+
+  Future<void> initLib() async{
     sharedpreferenceslib =  await SharedPreferences.getInstance();
   }
 
-  static Future<bool> initGobaleVarible() async{
+  Future<bool> initGobaleVarible() async{
     return await sharedpreferenceslib.setString(APP_GLOBLE_VARIBLE, json.jsonEncode(appGlobalVarible));
   }
 
-  static bool checkAlreadyInitGobaleVarible(){
-    var data =  sharedpreferenceslib.getString(APP_GLOBLE_VARIBLE);
+  bool checkAlreadyInitGobaleVarible(){
+    var data = this.sharedpreferenceslib.getString(APP_GLOBLE_VARIBLE);
     if (data != null) {
       print(data);
       return true;
