@@ -40,6 +40,7 @@ import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -103,27 +104,6 @@ public class ForegroundService extends Service{
     }
 
     public MappedByteBuffer loadModelTemper(String path, boolean isAsset) throws IOException {
-//        MappedByteBuffer buffer = null;
-//        String key = null;
-//        AssetManager assetManager = null;
-//        if (isAsset) {
-//            assetManager = this.getAssets();
-////            key = mRegistrar.lookupKeyForAsset(model);
-//            AssetFileDescriptor fileDescriptor = assetManager.openFd(path);
-//            FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
-//            FileChannel fileChannel = inputStream.getChannel();
-//            long startOffset = fileDescriptor.getStartOffset();
-//            long declaredLength = fileDescriptor.getDeclaredLength();
-//            buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
-//            return buffer;
-//        } else {
-////            FileInputStream inputStream = new FileInputStream(new File(model));
-////            FileChannel fileChannel = inputStream.getChannel();
-////            long declaredLength = fileChannel.size();
-////            buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, declaredLength);
-//            return  null;
-//        }
-
         AssetFileDescriptor fileDescriptor = assetManager.openFd(path);
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
         FileChannel fileChannel = inputStream.getChannel();
@@ -359,6 +339,9 @@ public class ForegroundService extends Service{
 
     }
 
+    SimpleDateFormat ft =
+            new SimpleDateFormat ("E yyyy.MM.dd 'at' hh:mm:ss a zzz");
+
 
 
      private DeviceCallback SightConnectionCallback = new DeviceCallback() {
@@ -392,13 +375,21 @@ public class ForegroundService extends Service{
                      picture.put(bytes);
                  }
 
+
                  final Bitmap pictureBuffer = BitmapFactory.decodeByteArray(picture.array(),0,picture.array().length);
                  if (TF_READY){
 
                      List<Classifier.Recognition> result = classifier.recognizeImage(pictureBuffer);
                      Log.d(TAG,String.valueOf(result.size()));
                      if (displayDevice.isConnected()){
-                         displayDevice.send("0"+result.get(0).getTitle());
+                         for (Classifier.Recognition euchres:result) {
+                             Log.d(TAG,euchres.getTitle() + "👈" + euchres.getConfidence());
+                         }
+                         if (result.size() <= 0 ){
+                             Log.d(TAG,"NULLLL OBJECT 😂😂😂😂😂😂");
+                         }else {
+                             displayDevice.send("0"+result.get(0).getTitle());
+                         }
                      }else {
                          Log.d(TAG + "SIGHT DISCONNECTED 🔥","");
                      }
@@ -407,12 +398,13 @@ public class ForegroundService extends Service{
 
                  }
 
-                 if (WRITE_TO_FILE){
+                 if (true){
                      // MAKE NEW THRESH
                      executor.execute(new Runnable() {
                          @Override
                          public void run() {
-                             new ImageToFile(applicationContext).setDirectoryName("images").setExternal(false).setFileName("")
+                             new ImageToFile(applicationContext).setDirectoryName("images").setExternal(false)
+                                     .setFileName("")
                                      .save(pictureBuffer);
                          }
                      });

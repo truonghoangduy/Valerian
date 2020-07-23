@@ -31,9 +31,12 @@ dependencies:
   tflite: ^1.0.5
   flutter_bluetooth_serial: ^0.2.2
   shared_preferences: ^0.5.8
+  path_provider: ^1.6.11
+  photo_view: ^0.9.2
+  auto_animated: ^2.1.0
   # custom plugin fail
-  # foreground_service:
-  #    path: ./foreground_service
+  foreground_service:
+     path: ./foreground_service
 
 
 dev_dependencies:
@@ -56,6 +59,12 @@ flutter:
     - assets/images/concept_image.png
     - assets/images/
     - assets/model/
+    - assets/labelmap.txt
+    - assets/detect.tflite
+    # - assets/flutter_assets/labelmap.txt
+    - assets/labels.txt
+    - assets/mobilenet_float_v1_224.tflite
+    - assets/mobilenet_quant_v1_224.tflite
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 

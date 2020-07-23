@@ -90,6 +90,8 @@ public class ImageToFile {
         if(!directory.exists() && !directory.mkdirs()){
             Log.e("ImageSaver","Error creating directory " + directory);
         }
+        Log.d("ImageSaver", directory.getAbsolutePath());
+
 
         return new File(directory, fileName);
     }

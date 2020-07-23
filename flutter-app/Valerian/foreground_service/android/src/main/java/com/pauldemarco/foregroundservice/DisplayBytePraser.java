@@ -25,23 +25,29 @@ public class DisplayBytePraser extends SocketReader  {
     public byte[] read() throws IOException {
         List<Byte> byteList = new ArrayList<>();
         byte[] tmp = new byte[1];
-        while(true) {
-            int n = reader.read();
-            reader.unread(n);
 
-            int count = reader.read(tmp);
-            if(count > 0) {
-                if(tmp[0] == delimiter){
-                    byteList.add(tmp[0]);
-                    byte[] returnBytes = new byte[byteList.size()];
-                    for(int i=0 ; i<byteList.size() ; i++){
-                        returnBytes[i] = byteList.get(i);
+        while(true) {
+            try {
+                int n = reader.read();
+                reader.unread(n);
+
+                int count = reader.read(tmp);
+                if(count > 0) {
+                    if(tmp[0] == delimiter){
+                        byteList.add(tmp[0]);
+                        byte[] returnBytes = new byte[byteList.size()];
+                        for(int i=0 ; i<byteList.size() ; i++){
+                            returnBytes[i] = byteList.get(i);
+                        }
+                        return returnBytes;
+                    } else {
+                        byteList.add(tmp[0]);
                     }
-                    return returnBytes;
-                } else {
-                    byteList.add(tmp[0]);
                 }
+            }catch (ArrayIndexOutOfBoundsException e){
+                e.getCause();
             }
+
         }
     }
 
