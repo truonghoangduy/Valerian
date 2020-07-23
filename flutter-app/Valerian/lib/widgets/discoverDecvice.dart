@@ -35,11 +35,11 @@ class _BLuetoothDiscoverDeviceState extends State<BLuetoothDiscoverDevice> {
     Future.delayed(Duration(seconds: 1),
         () => {this._bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.RE_SCAN)});
 
-    // Future.delayed(
-    //     Duration(seconds: 3),
-    //     () => {
-    //           this._bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.OK_FOUNDED)
-    //         });
+    Future.delayed(
+        Duration(seconds: 3),
+        () => {
+              this._bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.OK_FOUNDED)
+            });
     Size mediaQuery = MediaQuery.of(context).size;
     var futureBuilder =
         // RESCAN METHOD

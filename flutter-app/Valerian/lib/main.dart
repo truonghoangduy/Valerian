@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:Valerian/bloc/ble_bloc.dart';
 import 'package:Valerian/bloc/blue_serial_v2.dart';
 import 'package:Valerian/regconiction/regconiction.dart';
+import 'package:Valerian/screens/deviceConfig.dart';
 import 'package:Valerian/screens/findDevices.dart';
 import 'package:Valerian/screens/testByte.dart';
 import 'package:Valerian/ultis/globalPreferences.dart';
@@ -21,7 +23,9 @@ import 'package:flutter/services.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:clay_containers/clay_containers.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-// import 'package:foreground_service/foreground_service.dart';
+import 'package:foreground_service/foreground_service.dart';
+        // <service android:name="com.pauldemarco.foregroundservice.ForegroundService" >
+        // </service>
 
 // Idea BLE send by mode 0|-------,------- For wificonfig
 enum BLE_SEND_MODE {
@@ -33,10 +37,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-  // await Recognition().loadModel();
+  // await Recognition().loadModel(); //// Only for Flutter not for foreground services running task
   await GlobalVarible().initLib();
-  await GlobalVarible().initGobaleVarible();
-  GlobalVarible().checkAlreadyInitGobaleVarible();
+  if (!GlobalVarible().checkAlreadyInitGobaleVarible()) {
+    await GlobalVarible().initGobaleVarible();
+  }
+  await GlobalVarible().bluetoothState();
 
   runApp(FlutterBlueApp());
 }
@@ -119,6 +125,7 @@ class _BluetoothApdaterControllerState
       body: Container(
           child: StreamBuilder<BluetoothState>(
               stream: FlutterBluetoothSerial.instance.onStateChanged(),
+              initialData: GlobalVarible().blue_state,
               builder: (context, snap) {
                 print("Sate Change");
                 print(snap.data.toString());
@@ -129,7 +136,8 @@ class _BluetoothApdaterControllerState
                 if (snap.data == BluetoothState.STATE_ON ||
                     snap.data == BluetoothState.STATE_TURNING_ON) {
                   return FutureBuilder<bool>(
-                      future: checkPairedDevices(),
+                      // future: checkPairedDevices(),
+                      initialData: true,
                       builder: (context, snapshot) {
                         if (snapshot.data == true) {
                           return DeviceScrren();
@@ -290,171 +298,6 @@ class _BluetoothApdaterControllerState
 //               return discoverBLE(snapshot.data, queryData, context);
 //             }),
 //       ),
-//     );
-//   }
-// }
-
-class DeviceScrren extends StatefulWidget {
-  @override
-  _DeviceScrrenState createState() => _DeviceScrrenState();
-}
-
-class _DeviceScrrenState extends State<DeviceScrren> {
-  final Map<String, Map<bool, IconData>> uiIcon = {
-    '0': {true: Icons.wifi, false: Icons.signal_wifi_off},
-    '1': {false: Icons.notifications_none, true: Icons.notifications_active},
-    '2': {false: Icons.collections_bookmark, true: Icons.collections_bookmark}
-  };
-  _DeviceScrrenState() {}
-
-  final TextEditingController _controllerWifi_SSID = TextEditingController();
-  final TextEditingController _controllerWifi_Pass = TextEditingController();
-
-  String pressed;
-  @override
-  Widget build(BuildContext context) {
-    Size queryData = MediaQuery.of(context).size;
-    return Container(
-      width: double.infinity,
-      height: queryData.height,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Container(
-              // color: Colors.yellowAccent,
-              width: queryData.width * 0.4,
-              height: queryData.height,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ...uiIcon.keys.map((e) => GestureDetector(
-                            onDoubleTap: () async => {
-                                  wifiDialog(context),
-                                  setState(() {
-                                    this.pressed = e;
-                                  }),
-                                  print("OK"),
-                                  // await ForegroundService.start(
-                                  //   title: 'Valerain',
-                                  //   text: 'Background Ground Processing',
-                                  //   subText: 'Do not close',
-                                  //   ticker: 'Ticker',
-                                  // ),
-                                  print("Done")
-                                },
-
-                            child: ClayContainer(
-                                width: queryData.width * 0.3,
-                                height: queryData.height * 0.15,
-                                child: Icon(
-                                  e == this.pressed
-                                      ? uiIcon[e][this.pressed == e]
-                                      : uiIcon[e][false],
-                                  size: 30,
-                                  color: e == this.pressed
-                                      ? Colors.blueAccent
-                                      : Colors.black,
-                                )))
-                        // ...[1, 2, 3].map((e) => GestureDetector(
-                        //   onDoubleTap: ()=>{
-
-                        //     setState(() {
-                        //       this.pressed = e;
-                        //     })
-                        //   },
-                        //                       child: ClayContainer(
-                        //       width: queryData.width * 0.3,
-                        //       height: queryData.height * 0.15,
-                        //       child: Icon(
-                        //         Icons.wifi,
-                        //         size: 45,
-                        //         color: e==this.pressed?Colors.blueAccent:Colors.black,
-                        //       )
-                        //       // FlareActor("assets/images/Success Check.flr",
-                        //       // animation: "Untitled",),
-                        //       ),
-                        // )),
-                        // StreamBuilder(
-                        //     stream: _ble_bloc.ble_char_data,
-                        //     builder: (context, snapshot) {
-                        //       if (!snapshot.hasData) {
-                        //         return Container();
-                        //       } else {
-                        //         print(utf8.decode(snapshot.data));
-                        //         return Text(utf8.decode(snapshot.data),
-                        //             style: TextStyle(
-                        //               color: Colors.blueAccent
-                        //               ));
-                        //       }
-                        //     }),
-                        )
-                  ])),
-          Container(
-            // color: Colors.black45,
-            width: queryData.width * 0.6,
-            height: queryData.height,
-            child: Center(
-              child: ClayContainer(
-                width: queryData.width * 0.6,
-                height: queryData.height * 0.65,
-                depth: 10,
-                spread: 10,
-                borderRadius: 15,
-                child: Center(
-                    child: Transform.rotate(
-                  angle: -math.pi / 4,
-                  child: Image.asset("assets/images/concept_image.png"),
-                )),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  wifiDialog(BuildContext context) async {
-    return await showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (BuildContext context) => Dialog(
-                child: Container(
-                    child: Column(
-              children: [
-                ...["SSID", "Password"].map((e) => buildWifiConfig(
-                    e == "SSID" ? _controllerWifi_SSID : _controllerWifi_Pass,
-                    e))
-              ],
-            ))));
-  }
-
-  Widget buildWifiConfig(
-      TextEditingController textcontroller, String textLable) {
-    return TextField(
-      controller: textcontroller,
-      decoration: InputDecoration(labelText: textLable),
-    );
-  }
-}
-
-// class DeviceServies extends StatelessWidget {
-//   final BluetoothCharacteristic characteristic;
-//   DeviceServies(this.characteristic) {}
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       children: <Widget>[
-//         Container(
-//           color: Colors.yellowAccent,
-//           width: double.infinity,
-//           height: double.infinity,
-//         ),
-//         Container(
-//           color: Colors.blue,
-//           width: double.infinity,
-//           height: double.infinity,
-//         )
-//       ],
 //     );
 //   }
 // }
