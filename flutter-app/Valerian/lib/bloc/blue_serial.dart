@@ -103,7 +103,7 @@ class BluetoothBloc {
       connectionSight.input.listen(handleImageCallBack).onDone(() {
         print("LOST Connection TO : " + BOARD_NAME_SIGHT);
         cleenUpResoruce(BOARD_NAME_SIGHT);
-        this.scanFlag.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
+        this.scanFlag.sink.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
       });
       connectingState++;
     }
@@ -111,6 +111,7 @@ class BluetoothBloc {
       connectionDisplay.input.listen(handleDisplayCallBack).onDone(() {
         print("LOST Connection TO : " + BOARD_NAME_DISPLAY);
         cleenUpResoruce(BOARD_NAME_DISPLAY);
+        this.scanFlag.sink.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
       });
       connectingState++;
     }
@@ -268,24 +269,14 @@ class BluetoothBloc {
       if (event == BLUETOOTH_SCAN_STATE.RE_SCAN) {
         this.scanDevicesV1();
       }else if(event == BLUETOOTH_SCAN_STATE.STOP_SCAN){
+        print("STOP SCANING");
         await this.scaningSubscripption?.pause();
         await FlutterBluetoothSerial.instance.cancelDiscovery();
       }
+      if (event == BLUETOOTH_SCAN_STATE.OK_FOUNDED) {
+        print("OK FOUNDED");
+      }
     });
-  }
-
-  bool deviceConnectionFilter() {
-    // deviceCounter = 0;
-    // if (this.connectionDisplay?.isConnected != null) {
-    //   deviceCounter++;
-    // }
-    // if (this.connectionDisplay?.address != null) {
-    //   deviceCounter++;
-    // }
-    // if (deviceCounter == DEVICE_DEBUG) {
-    //   return true;
-    // }
-    // return false;
   }
 
   bool deviceScanFilter() {
@@ -330,13 +321,18 @@ class BluetoothBloc {
       print("Stop Scanning");
       if (this.deviceScanFilter()) {
         print("Found Total Devoices");
-        if (await this.connectToDevice()) {
+        if (
+          // await this.connectToDevice()
+          true
+          ) {
           
         }else{
           throw BluetoothException(message: "Cannot Connect To DEVICES");
         }
         // TO DO Implement for each Devices lost connection
         // SECTION FOR CONNECT TO DEVICE
+
+        this.scanFlag.sink.add(BLUETOOTH_SCAN_STATE.OK_FOUNDED);
       } else {
         await FlutterBluetoothSerial.instance.cancelDiscovery();
         this.scanFlag.sink.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
@@ -345,7 +341,7 @@ class BluetoothBloc {
   }
 
   Future<bool> scanDevices() async {
-    return true;
+    return false;
     // var scaning = FlutterBluetoothSerial.instance.startDiscovery();
     // // this.scaningSubscripption.onDone(() {
     // //    print("object"); });

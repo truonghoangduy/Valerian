@@ -1,12 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:Valerian/bloc/ble_bloc.dart';
+import 'package:Valerian/bloc/blue_serial_v2.dart';
 import 'package:Valerian/regconiction/regconiction.dart';
+import 'package:Valerian/screens/deviceConfig.dart';
 import 'package:Valerian/screens/findDevices.dart';
 import 'package:Valerian/screens/testByte.dart';
+import 'package:Valerian/ultis/globalPreferences.dart';
 import 'package:Valerian/widgets/bluetoothOff.dart';
 import 'package:Valerian/widgets/detectObjectOnImage.dart';
+import 'package:Valerian/widgets/discoverDecvice.dart';
 import 'package:clay_containers/widgets/clay_containers.dart';
 import 'package:clay_containers/widgets/clay_text.dart';
 import 'package:flare_flutter/flare_actor.dart';
@@ -14,10 +19,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // import 'package:flutter_blue/flutter_blue.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:clay_containers/clay_containers.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:foreground_service/foreground_service.dart';
+        // <service android:name="com.pauldemarco.foregroundservice.ForegroundService" >
+        // </service>
 
 // Idea BLE send by mode 0|-------,------- For wificonfig
 enum BLE_SEND_MODE {
@@ -29,7 +37,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-  await Recognition().loadModel();
+  // await Recognition().loadModel(); //// Only for Flutter not for foreground services running task
+  await GlobalVarible().initLib();
+  if (!GlobalVarible().checkAlreadyInitGobaleVarible()) {
+    await GlobalVarible().initGobaleVarible();
+  }
+  await GlobalVarible().bluetoothState();
 
   runApp(FlutterBlueApp());
 }
@@ -79,13 +92,31 @@ class BluetoothApdaterController extends StatefulWidget {
 
 class _BluetoothApdaterControllerState
     extends State<BluetoothApdaterController> {
-
   BluetoothState state;
-  
+
   @override
-  void initState(){
+  void initState() {
     // TODO: implement initState
     super.initState();
+  }
+
+  Future<bool> checkPairedDevices() async {
+    List<BluetoothDevice> listofDevices =
+        await FlutterBluetoothSerial.instance.getBondedDevices();
+    int deviceCounter = 0;
+    listofDevices.forEach((element) {
+      if (element.name == BOARD_NAME_SIGHT) {
+        deviceCounter++;
+      }
+      if (element.name == BOARD_NAME_DISPLAY) {
+        deviceCounter++;
+      }
+    });
+    if (deviceCounter >= DEVICE_DEBUG) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override
@@ -93,25 +124,37 @@ class _BluetoothApdaterControllerState
     return Scaffold(
       body: Container(
           child: StreamBuilder<BluetoothState>(
-                      stream: FlutterBluetoothSerial.instance.onStateChanged(),
-                      builder: (context, snap) {
-                        print("Sate Change");
-                        print(snap.data.toString());
-                        if (snap.data == BluetoothState.STATE_OFF) {
-                          return BluetoothOffScreen();
+              stream: FlutterBluetoothSerial.instance.onStateChanged(),
+              initialData: GlobalVarible().blue_state,
+              builder: (context, snap) {
+                print("Sate Change");
+                print(snap.data.toString());
+                if (snap.data == BluetoothState.STATE_OFF) {
+                  return BluetoothOffScreen();
+                }
+
+                if (snap.data == BluetoothState.STATE_ON ||
+                    snap.data == BluetoothState.STATE_TURNING_ON) {
+                  return FutureBuilder<bool>(
+                      // future: checkPairedDevices(),
+                      initialData: true,
+                      builder: (context, snapshot) {
+                        if (snapshot.data == true) {
+                          return DeviceScrren();
                         }
-                        return BLuetoothDiscover(
-                          // color: Colors.black,
-                          // width: 100,
-                          // height: 100,
-                        );
-                      }
-            )
-      ),
+                        if (snapshot.data == false) {
+                          return BLuetoothDiscoverDevice();
+                        }
+                        return Container();
+                      });
+                }
+                return Container(
+                  color: Colors.black,
+                );
+              })),
     );
   }
 }
-
 
 // class FindDevicesScreen extends StatefulWidget {
 //   @override
@@ -119,20 +162,16 @@ class _BluetoothApdaterControllerState
 // }
 
 // class _FindDevicesScreenState extends State<FindDevicesScreen> {
-//   BLE_Bloc _ble_bloc;
 //   _FindDevicesScreenState() {
-//     _ble_bloc = BLE_Bloc();
 //   }
 //   @override
 //   void initState() {
 //     super.initState();
-//     _ble_bloc.scanDevices();
 //   }
 
 //   @override
 //   void dispose() {
 //     super.dispose();
-//     _ble_bloc.dispose();
 //   }
 
 //   Widget discoverBLE(
@@ -259,177 +298,6 @@ class _BluetoothApdaterControllerState
 //               return discoverBLE(snapshot.data, queryData, context);
 //             }),
 //       ),
-//     );
-//   }
-// }
-
-// class DeviceScrren extends StatefulWidget {
-//   @override
-//   _DeviceScrrenState createState() => _DeviceScrrenState();
-// }
-
-// class _DeviceScrrenState extends State<DeviceScrren> {
-//   BLE_Bloc _ble_bloc;
-//   final Map<String, Map<bool, IconData>> uiIcon = {
-//     '0': {true: Icons.wifi, false: Icons.signal_wifi_off},
-//     '1': {false: Icons.notifications_none, true: Icons.notifications_active},
-//     '2': {false: Icons.collections_bookmark, true: Icons.collections_bookmark}
-//   };
-//   _DeviceScrrenState() {
-//     _ble_bloc = BLE_Bloc();
-//   }
-
-//   final TextEditingController _controllerWifi_SSID = TextEditingController();
-//   final TextEditingController _controllerWifi_Pass = TextEditingController();
-
-//   String pressed;
-//   @override
-//   Widget build(BuildContext context) {
-//     Size queryData = MediaQuery.of(context).size;
-//     return Container(
-//       width: double.infinity,
-//       height: queryData.height,
-//       child: Row(
-//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//         children: <Widget>[
-//           Container(
-//               // color: Colors.yellowAccent,
-//               width: queryData.width * 0.4,
-//               height: queryData.height,
-//               child: Column(
-//                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                   children: [
-//                     ...uiIcon.keys.map((e) => GestureDetector(
-//                             onDoubleTap: () => {
-//                                   wifiDialog(context),
-//                                   setState(() {
-//                                     this.pressed = e;
-//                                   })
-//                                 },
-//                             child: ClayContainer(
-//                                 width: queryData.width * 0.3,
-//                                 height: queryData.height * 0.15,
-//                                 child: Icon(e == this.pressed
-//                                     ? uiIcon[e][this.pressed == e]
-//                                     : uiIcon[e][false],
-//                                     size: 30,
-//                                     color: e==this.pressed?Colors.blueAccent:Colors.black,)))
-//                         // ...[1, 2, 3].map((e) => GestureDetector(
-//                         //   onDoubleTap: ()=>{
-
-//                         //     setState(() {
-//                         //       this.pressed = e;
-//                         //     })
-//                         //   },
-//                         //                       child: ClayContainer(
-//                         //       width: queryData.width * 0.3,
-//                         //       height: queryData.height * 0.15,
-//                         //       child: Icon(
-//                         //         Icons.wifi,
-//                         //         size: 45,
-//                         //         color: e==this.pressed?Colors.blueAccent:Colors.black,
-//                         //       )
-//                         //       // FlareActor("assets/images/Success Check.flr",
-//                         //       // animation: "Untitled",),
-//                         //       ),
-//                         // )),
-//                         // StreamBuilder(
-//                         //     stream: _ble_bloc.ble_char_data,
-//                         //     builder: (context, snapshot) {
-//                         //       if (!snapshot.hasData) {
-//                         //         return Container();
-//                         //       } else {
-//                         //         print(utf8.decode(snapshot.data));
-//                         //         return Text(utf8.decode(snapshot.data),
-//                         //             style: TextStyle(
-//                         //               color: Colors.blueAccent
-//                         //               ));
-//                         //       }
-//                         //     }),
-//                         )
-//                   ])),
-//           Container(
-//             // color: Colors.black45,
-//             width: queryData.width * 0.6,
-//             height: queryData.height,
-//             child: Center(
-//               child: ClayContainer(
-//                 width: queryData.width * 0.6,
-//                 height: queryData.height * 0.65,
-//                 depth: 10,
-//                 spread: 10,
-//                 borderRadius: 15,
-//                 child: Center(
-//                     child: Transform.rotate(
-//                   angle: -math.pi / 4,
-//                   child: Image.asset("assets/images/concept_image.png"),
-//                 )),
-//               ),
-//             ),
-//           )
-//         ],
-//       ),
-//     );
-//   }
-
-//   wifiDialog(BuildContext context) async{
-//     return await showDialog(context: context,
-//     barrierDismissible: true,
-//     builder: (BuildContext context)=>Dialog(
-//         child: Container(
-//           child:Column(
-//             children: [
-//               ...["SSID","Password"].map((e) => buildWifiConfig(e=="SSID"?_controllerWifi_SSID:_controllerWifi_Pass, e))
-
-//             ],
-//           )
-//         )
-//     ));
-//   }
-
-//   Widget buildWifiConfig(TextEditingController textcontroller,String textLable){
-//     return TextField(
-//       controller: textcontroller,
-//       decoration: InputDecoration(
-//         labelText: textLable
-//       ),
-
-//     );
-//   }
-// }
-
-// class BLE_Functionality extends StatefulWidget {
-//   @override
-//   _BLE_FunctionalityState createState() => _BLE_FunctionalityState();
-// }
-
-// class _BLE_FunctionalityState extends State<BLE_Functionality> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-
-//     );
-//   }
-// }
-
-// class DeviceServies extends StatelessWidget {
-//   final BluetoothCharacteristic characteristic;
-//   DeviceServies(this.characteristic) {}
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       children: <Widget>[
-//         Container(
-//           color: Colors.yellowAccent,
-//           width: double.infinity,
-//           height: double.infinity,
-//         ),
-//         Container(
-//           color: Colors.blue,
-//           width: double.infinity,
-//           height: double.infinity,
-//         )
-//       ],
 //     );
 //   }
 // }
