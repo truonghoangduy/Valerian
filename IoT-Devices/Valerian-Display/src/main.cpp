@@ -36,6 +36,7 @@ OneButton oneButton(INPUT_PINS, false, false);
 const char *filename = "/config.json"; // SPIFFS config file
 char *ssid = "NguyenDieuLinh";
 char *password = "0937437499";
+char EOL = '\0';
 BluetoothSerial SerialBT;
 
 char stop = '\n';
@@ -54,7 +55,7 @@ void displayConfig(String mesges, int opCode)
   {
     Serial.printf("Hello\n");
     Serial.println(mesges);
-    showDisplay(mesges);
+    // showDisplay(mesges);
     // showDisplay();
   }
   else if (opCode == TEXT)
@@ -86,12 +87,16 @@ void btCallback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
     displayConfig(mesges.substring(1), opCode);
     // testdrawtext((char *)mesges.c_str(),ST7735_WHITE);
     // Serial.println((char *)param->data_ind.data);   // setCameraParam(paramInt);
+  }else if(event == ESP_SPP_CLOSE_EVT ){
+    Serial.println("Client disconnected");
   }
+  
+  
 }
 
 void initBT()
 {
-  if (!SerialBT.begin("Valerian-Display"))
+  if (!SerialBT.begin("Valerian-Display-Test01"))
   {
     Serial.println("An error occurred initializing Bluetooth");
     ESP.restart();
@@ -111,7 +116,12 @@ void callBackLongPressStop()
   Serial.println(sizeof(DECTION));
   if (SerialBT.hasClient())
   {
-    SerialBT.write((uint8_t *)DECTION, sizeof(DECTION));
+    Serial.println("Send Messages");
+    int encode = (int) DECTION;
+    // SerialBT.write((uint8_t *)&encode, sizeof(encode));
+    // SerialBT.write((uint8_t *)&EOL, sizeof(EOL));
+    // SerialBT.write((uint8_t *)&stop, sizeof(stop));
+    SerialBT.println(encode);SerialBT.flush();
   }
 }
 void callBackDuringLongPressStop()
@@ -129,7 +139,7 @@ void setup()
   pinMode(INPUT_PINS, OUTPUT);
 
   // Serial.println("The device started, now you can pair it with bluetooth!");
-  displaysetup();
+  // displaysetup();
   // showDisplay();
   // delay(2000);
   initBT();
@@ -142,6 +152,7 @@ void setup()
 void loop()
 {
   oneButton.tick();
+  // Serial.println(digitalRead(INPUT_PINS));
   // tft.invertDisplay(true);
   // delay(2000);
   // tft.invertDisplay(false);
