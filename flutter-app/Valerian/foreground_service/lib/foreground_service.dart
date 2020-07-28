@@ -37,4 +37,9 @@ class ForegroundService {
     assert(const LocalPlatform().isAndroid);
     return _channel.invokeMethod('stop');
   }
+
+    static Future<String> startNotifcation() {
+    assert(const LocalPlatform().isAndroid);
+    return _channel.invokeMethod('start_notifcation');
+  }
 }

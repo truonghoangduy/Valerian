@@ -2,6 +2,7 @@ import 'package:Valerian/bloc/blue_serial.dart';
 import 'package:Valerian/main.dart';
 import 'package:Valerian/regconiction/regconiction.dart';
 import 'package:Valerian/ultis/appEnum.dart';
+import 'package:Valerian/ultis/appRoute.dart';
 import 'package:Valerian/widgets/bluetoothOff.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
@@ -30,16 +31,26 @@ class _BLuetoothDiscoverDeviceState extends State<BLuetoothDiscoverDevice> {
     fit: BoxFit.scaleDown,
     animation: "Untitled",
   );
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    // FlutterBluetoothSerial.instance.disconnect();
+    // this._bluetoothBloc.cleenUpResoruce();
+  }
   @override
   Widget build(BuildContext context) {
-    Future.delayed(Duration(seconds: 1),
-        () => {this._bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.RE_SCAN)});
+    // Future.delayed(Duration(seconds: 1),
+    //     () => {
+          this._bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
+          // });
 
-    Future.delayed(
-        Duration(seconds: 3),
-        () => {
-              this._bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.OK_FOUNDED)
-            });
+    // Future.delayed(
+    //     Duration(seconds: 3),
+    //     () => {
+    //           this._bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.OK_FOUNDED)
+    //         });
     Size mediaQuery = MediaQuery.of(context).size;
     var futureBuilder =
         // RESCAN METHOD
@@ -112,7 +123,7 @@ class _BLuetoothDiscoverDeviceState extends State<BLuetoothDiscoverDevice> {
               ),
               StreamBuilder<BLUETOOTH_SCAN_STATE>(
                 stream: this._bluetoothBloc.scanFlag.stream,
-                initialData: BLUETOOTH_SCAN_STATE.RE_SCAN,
+                // initialData: BLUETOOTH_SCAN_STATE.RE_SCAN,
                 builder: (BuildContext context,
                     AsyncSnapshot<BLUETOOTH_SCAN_STATE> snapshot) {
                   if (snapshot.data == BLUETOOTH_SCAN_STATE.OK_FOUNDED) {
@@ -125,10 +136,9 @@ class _BLuetoothDiscoverDeviceState extends State<BLuetoothDiscoverDevice> {
                           child: RaisedButton(
                             onPressed: () async {
                               if (await this._bluetoothBloc.connectToDevice()) {
+                                await this._bluetoothBloc.cleenUpResoruce();
                                 print("Paring went OK");
-                                Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) => BluetoothOffScreen(),
-                                ));
+                                await Navigator.popAndPushNamed(context, AppRouting.homePage);
 
                               }
                             },

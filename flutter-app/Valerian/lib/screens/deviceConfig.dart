@@ -92,18 +92,24 @@ class _DeviceScrrenState extends State<DeviceScrren> {
                     ...uiIcon.keys.map((e) => GestureDetector(
                             onDoubleTap: () async => {
                                   await toggleButton(e),
+                                  await ForegroundService.stop(),
                                   // FlutterBluetoothSerial.instance.cancelDiscovery(),
                                   // await FlutterBluetoothSerial.instance.disconnect(),
                                   // FlutterBluetoothSerial.instance.
                                   // FlutterBluetoothSerial.instance.
                                   // wifiDialog(context);
                                   print("OK"),
+                                  if (this.sestingSwicth(e) == "notification") {
+                                    await ForegroundService.startNotifcation()
+                                  }else{
                                   await ForegroundService.start(
                                     title: 'Valerain',
                                     text: 'Background Ground Processing',
                                     subText: 'Do not close',
                                     ticker: 'Ticker',
                                   ),
+                                  },
+
 
                                   print("Done"),
 

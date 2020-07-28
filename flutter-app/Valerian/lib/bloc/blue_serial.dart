@@ -13,8 +13,8 @@ import 'package:async/async.dart';
 import 'package:rxdart/subjects.dart';
 
 const BOARD_NAME_SIGHT = "Valerian-Sight";
-const BOARD_NAME_DISPLAY = "Valerian-Display";
-const DEVICE_DEBUG = 1;
+const BOARD_NAME_DISPLAY = "Valerian-Display-Test01";
+const DEVICE_DEBUG = 2;
 // enum BLUETOOTHFUNCTIONALITY {
 const NOTIFICATION = 0;
 const TEXT = 1; // Normal String
@@ -84,11 +84,13 @@ class BluetoothBloc {
     functionalitySwitch(int.parse(message[0]), message); // Blank data for now
   }
 
-  cleenUpResoruce(String devicename) {
+  Future<void> cleenUpResoruce({String devicename}) async {
     if (devicename == BOARD_NAME_SIGHT) {
+      await connectionSight.close();
       connectionSight?.dispose();
     }
     if (devicename == BOARD_NAME_DISPLAY) {
+      await connectionSight.close();
       connectionDisplay?.dispose();
     }
   }
@@ -97,22 +99,22 @@ class BluetoothBloc {
     int connectingState = 0;
     connectionSight = await BluetoothConnection.toAddress(
         deviceSight.address); //BOARD_NAME_SIGHT
-    // connectionDisplay = await BluetoothConnection.toAddress(
-    //     deviceDisplay.address); //BOARD_NAME_DISPLAY
+    connectionDisplay = await BluetoothConnection.toAddress(
+        deviceDisplay.address); //BOARD_NAME_DISPLAY
     if (connectionSight != null) {
-      connectionSight.input.listen(handleImageCallBack).onDone(() {
-        print("LOST Connection TO : " + BOARD_NAME_SIGHT);
-        cleenUpResoruce(BOARD_NAME_SIGHT);
-        this.scanFlag.sink.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
-      });
+      //   connectionSight.input.listen(handleImageCallBack).onDone(() {
+      //     print("LOST Connection TO : " + BOARD_NAME_SIGHT);
+      //     cleenUpResoruce(BOARD_NAME_SIGHT);
+      //     this.scanFlag.sink.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
+      //   });
       connectingState++;
     }
     if (connectionDisplay != null) {
-      connectionDisplay.input.listen(handleDisplayCallBack).onDone(() {
-        print("LOST Connection TO : " + BOARD_NAME_DISPLAY);
-        cleenUpResoruce(BOARD_NAME_DISPLAY);
-        this.scanFlag.sink.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
-      });
+      //   connectionDisplay.input.listen(handleDisplayCallBack).onDone(() {
+      //     print("LOST Connection TO : " + BOARD_NAME_DISPLAY);
+      //     cleenUpResoruce(BOARD_NAME_DISPLAY);
+      //     this.scanFlag.sink.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
+      //   });
       connectingState++;
     }
     if (connectingState >= DEVICE_DEBUG) {
@@ -260,15 +262,16 @@ class BluetoothBloc {
     });
   }
 
-  BehaviorSubject<BLUETOOTH_SCAN_STATE> scanFlag = new BehaviorSubject<BLUETOOTH_SCAN_STATE>();
+  BehaviorSubject<BLUETOOTH_SCAN_STATE> scanFlag =
+      new BehaviorSubject<BLUETOOTH_SCAN_STATE>();
   int deviceCounter = 0;
 
   listForScanFlagV1() {
-    this.scanFlag.stream.listen((event)async {
+    this.scanFlag.stream.listen((event) async {
       print(event);
       if (event == BLUETOOTH_SCAN_STATE.RE_SCAN) {
         this.scanDevicesV1();
-      }else if(event == BLUETOOTH_SCAN_STATE.STOP_SCAN){
+      } else if (event == BLUETOOTH_SCAN_STATE.STOP_SCAN) {
         print("STOP SCANING");
         await this.scaningSubscripption?.pause();
         await FlutterBluetoothSerial.instance.cancelDiscovery();
@@ -322,11 +325,9 @@ class BluetoothBloc {
       if (this.deviceScanFilter()) {
         print("Found Total Devoices");
         if (
-          // await this.connectToDevice()
-          true
-          ) {
-          
-        }else{
+            // await this.connectToDevice()
+            true) {
+        } else {
           throw BluetoothException(message: "Cannot Connect To DEVICES");
         }
         // TO DO Implement for each Devices lost connection
@@ -398,7 +399,6 @@ class BluetoothBloc {
   }
 
   establishConnectionToDevice(String deviceName) {}
-
 
   Future<BluetoothDevice> scanDeviceWithName(String deviceName) async {
     try {
