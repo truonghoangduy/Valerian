@@ -98,9 +98,9 @@ void capture()
     {
       Serial.println("Not JPEG");
     }
-    delay(50);
+    delay(80);
   } while (formatCheck());
-  delay(300);
+  delay(500);
   Serial.println("Begin Send");
   writeSerialBT();
 
@@ -158,6 +158,8 @@ void setCameraParam(int paramInt)
     s->set_framesize(s, FRAMESIZE_VGA);
     break;
   }
+
+  capture();
 
 }
 
@@ -252,7 +254,7 @@ void setup()
   // Serial.println("Init Cam Sussesfully");
 }
 
-}
+
 
 // enum BLUE_MESSAGE
 // {
@@ -408,9 +410,9 @@ void setup()
 //   initBT();
 // }
 
-// void loop()
-// {
-// }
+void loop()
+{
+}
 
 //   for (size_t i = 0; i < fb->len; i++)
 //   {
