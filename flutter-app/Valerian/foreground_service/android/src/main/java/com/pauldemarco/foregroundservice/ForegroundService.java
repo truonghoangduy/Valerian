@@ -3,7 +3,7 @@ package com.pauldemarco.foregroundservice;
 import android.Manifest;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.Service;
+//import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,6 +11,7 @@ import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Build;
@@ -28,6 +29,8 @@ import me.aflak.bluetooth.interfaces.DeviceCallback;
  import me.aflak.bluetooth.interfaces.DiscoveryCallback;
 
 import android.bluetooth.BluetoothDevice;
+import android.service.notification.NotificationListenerService;
+import android.service.notification.StatusBarNotification;
 //import java.util.function.Predicate;
 //import java.util.stream.Collectors;
 
@@ -42,24 +45,18 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-//import java.io.BufferedReader;
-//import java.io.IOException;
-//import java.io.InputStream;
-//import java.io.InputStreamReader;
-//import java.io.PushbackInputStream;
-//import java.util.ArrayList;
-//import java.util.List;
 
 
 
 
-public class ForegroundService extends Service{
+
+    public class ForegroundService extends NotificationListenerService {
+    public static String NOTIFICATION_INTENT = "com.pauldemarco.foregroundservice";
     private static final String TAG = "ForegroundService";
     Bluetooth bluetoothScan;
     Bluetooth displayDevice;
@@ -170,6 +167,16 @@ public class ForegroundService extends Service{
             Log.d(TAG,"PREMISSION OK FOR FOREGROUND");
         }else {
             Log.d(TAG,"do not has premission to run on FOREGROUND");
+            if (checkSelfPermission(Manifest.permission.BIND_NOTIFICATION_LISTENER_SERVICE) == PackageManager.PERMISSION_GRANTED){
+                Log.d(TAG,"PREMISSION OK FOR BIND_NOTIFICATION_LISTENER_SERVICE");
+            }else {
+                Log.d(TAG,"do not has premission to run on FOREGROUND");
+            }
+            if (checkSelfPermission(Manifest.permission.ACCESS_NOTIFICATION_POLICY) == PackageManager.PERMISSION_GRANTED){
+                Log.d(TAG,"PREMISSION OK FOR ACCESS_NOTIFICATION_POLICY");
+            }else {
+                Log.d(TAG,"do not has premission to run on FOREGROUND");
+            }
         }
     }
 
@@ -333,14 +340,9 @@ public class ForegroundService extends Service{
 
     List<byte[]> bluetoothPicturePackage = new ArrayList<>();
 
-    void drawImage(int size){
-//        ByteBuffer pictureBuffer = ByteBuffer.allocate(size);
-//        pictureBuffer.
 
-    }
 
-    SimpleDateFormat ft =
-            new SimpleDateFormat ("E yyyy.MM.dd 'at' hh:mm:ss a zzz");
+    SimpleDateFormat ft = new SimpleDateFormat ("E yyyy.MM.dd 'at' hh:mm:ss a zzz");
 
 
 
@@ -451,14 +453,6 @@ public class ForegroundService extends Service{
 
 
 
-
-
-
-
-
-
-
-
      AssetManager assetManager;
     private Executor executor = Executors.newSingleThreadExecutor();
     private Classifier classifier;
@@ -473,6 +467,7 @@ public class ForegroundService extends Service{
         assetManager = this.getAssets();
         Log.d(TAG,"ForeGround Work 1?");
         applicationContext = this.getApplicationContext();
+
 //        loadLabels(this.getAssets(),"flutter_assets/assets/labelmap.txt");
 //
 //        try {
@@ -484,15 +479,6 @@ public class ForegroundService extends Service{
         executor.execute(new Runnable() {
             @Override
             public void run() {
-//                try {
-//                    classifier =  TensorFlowImageClassifier.create(assetManager,
-//                            "flutter_assets/assets/detect.tflite",
-//                            "flutter_assets/assets/labelmap.txt",
-//                            300,true,
-//                            4,0.1f);
-//                } catch (final Exception e) {
-//                    throw new RuntimeException("Error initializing TensorFlow!", e);
-//                }
                 try {
                     classifier = new TensorFlowImageClassifier(
                             "flutter_assets/assets/mobilenet_float_v1_224.tflite",
@@ -580,10 +566,84 @@ public class ForegroundService extends Service{
             }
 
         } else if (ForegroundServicePlugin.STOPFOREGROUND_ACTION.equals(intent.getAction())) {
+            Log.d(TAG,"🧨 Stop Foreground Services");
             stopForeground(true);
             stopSelf();
         }
         return START_STICKY;
+    }
+
+    enum NOTIFICATION_ENCODE{
+        MSG_NOTIFICATION,
+        CALL_NOTIFICATION
+    }
+
+    String notifiCation_EncodeSwitch(String codex ){
+        switch (codex){
+            case Notification.CATEGORY_CALL:
+                return NOTIFICATION_ENCODE.CALL_NOTIFICATION.toString();
+            case Notification.CATEGORY_MESSAGE:
+                return NOTIFICATION_ENCODE.MSG_NOTIFICATION.toString();
+            default:
+                return NOTIFICATION_ENCODE.MSG_NOTIFICATION.toString();
+        }
+    }
+
+    boolean filter_Notification_Category(String codex){
+        switch (codex){
+            case Notification.CATEGORY_CALL:
+                return true;
+            case Notification.CATEGORY_MESSAGE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+
+    @Override
+    public void onNotificationPosted(StatusBarNotification sbn) {
+        String pack = sbn.getPackageName();
+        String tiker="";
+        String notification_category ="";
+        String title = "";
+        String text="";
+
+        Bundle extraOnNotifi = sbn.getNotification().extras;
+        title =  extraOnNotifi.getString("android.title");
+        text = extraOnNotifi.getString("android.text").toString();
+        if (sbn.getNotification().tickerText != null){
+            tiker = sbn.getNotification().tickerText.toString();
+
+        }
+
+        if (sbn.getNotification().category != null){
+            notification_category = this.notifiCation_EncodeSwitch(sbn.getNotification().category);
+            if (displayDevice != null){
+                if ( displayDevice.isConnected()){
+                    try {
+                        if (this.filter_Notification_Category(sbn.getNotification().category)){
+                            displayDevice.send(notification_category+tiker);
+                        }
+                    }catch (Exception e){
+                        Log.d(TAG,e.getMessage());
+                    }
+                }
+            }
+
+        }
+
+        Log.d(TAG,"onNotificationPosted : 👉 " + tiker +" 🌟 "+ sbn.getNotification().category);
+
+
+
+
+    }
+
+    public class LocalBinder extends Binder {
+            ForegroundService getService() {
+                return ForegroundService.this;
+            }
     }
 
 
@@ -594,12 +654,21 @@ public class ForegroundService extends Service{
 //        sightDevice.disconnect();
 //        displayDevice.disconnect();
         Log.d(TAG,"ForeGround OFFF ?");
+//        stopForeground(true);
+//        stopSelf();
 
     }
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(TAG,intent.getAction());
         // Used only in case if services are bound (Bound Services).
-        return null;
+        return super.onBind(intent);
     }
+
+    @Override
+    public void onNotificationRemoved(StatusBarNotification sbn) {
+        throw new RuntimeException("Stub!");
+    }
+
 }
