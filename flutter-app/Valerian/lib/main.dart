@@ -26,7 +26,7 @@ import 'package:flutter/services.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:clay_containers/clay_containers.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:foreground_service/foreground_service.dart';
+// import 'package:foreground_service/foreground_service.dart';
 // <service android:name="com.pauldemarco.foregroundservice.ForegroundService" >
 // </service>
 
@@ -38,7 +38,7 @@ enum BLE_SEND_MODE {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations(
+  await SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   // await Recognition().loadModel(); //// Only for Flutter not for foreground services running task
   await GlobalVarible().initLib();
@@ -103,7 +103,7 @@ class _BluetoothApdaterControllerState
     if (deviceCounter >= DEVICE_DEBUG) {
       return true;
     } else {
-      print("MISING : "+ deviceCounter.toString() + "device 🤕");
+      print("MISING : " + deviceCounter.toString() + "device 🤕");
       return false;
     }
   }
@@ -125,7 +125,7 @@ class _BluetoothApdaterControllerState
                 if (snap.data == BluetoothState.STATE_ON ||
                     snap.data == BluetoothState.STATE_TURNING_ON) {
                   return FutureBuilder<bool>(
-                      future: checkPairedDevices(),
+                      future: checkPairedDevices(), // List Paired Devices Looking for ours
                       // initialData: true,
                       builder: (context, snapshot) {
                         if (snapshot.data == true) {
@@ -133,13 +133,7 @@ class _BluetoothApdaterControllerState
                         }
                         if (snapshot.data == false) {
                           print("👉 PairedDevices UNFOUND 😩😩😩");
-                          return FloatingActionButton(
-                              backgroundColor: Colors.red,
-                              onPressed: () async {
-                                await Navigator.popAndPushNamed(
-                                    context,
-                                    AppRouting.scaningPage);
-                              });
+                          return BLuetoothDiscoverDevice();
                         }
                         return Container();
                       });

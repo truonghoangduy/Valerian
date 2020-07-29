@@ -39,12 +39,32 @@ class _BLuetoothDiscoverDeviceState extends State<BLuetoothDiscoverDevice> {
     // FlutterBluetoothSerial.instance.disconnect();
     // this._bluetoothBloc.cleenUpResoruce();
   }
+    Future<bool> checkPairedDevices() async {
+    List<BluetoothDevice> listofDevices =
+        await FlutterBluetoothSerial.instance.getBondedDevices();
+    int deviceCounter = 0;
+    listofDevices.forEach((element) {
+      if (element.name == BOARD_NAME_SIGHT) {
+        deviceCounter++;
+      }
+      if (element.name == BOARD_NAME_DISPLAY) {
+        deviceCounter++;
+      }
+    });
+    if (deviceCounter >= DEVICE_DEBUG) {
+      return true;
+    } else {
+      print("MISING : " + deviceCounter.toString() + "device 🤕");
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Future.delayed(Duration(seconds: 1),
     //     () => {
-          this._bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
-          // });
+    this._bluetoothBloc.scanFlag.add(BLUETOOTH_SCAN_STATE.RE_SCAN);
+    //  });
 
     // Future.delayed(
     //     Duration(seconds: 3),
@@ -79,7 +99,8 @@ class _BLuetoothDiscoverDeviceState extends State<BLuetoothDiscoverDevice> {
                           Align(
                             alignment: Alignment.topLeft,
                             child: Container(
-                              color: Colors.black,
+                              decoration: BoxDecoration(
+                                  color: Colors.black, shape: BoxShape.circle),
                               width: 50,
                               height: 50,
                               margin: EdgeInsets.only(
@@ -90,10 +111,11 @@ class _BLuetoothDiscoverDeviceState extends State<BLuetoothDiscoverDevice> {
                           Align(
                               alignment: Alignment.topRight,
                               child: Container(
-                                color: Colors.red,
                                 margin: EdgeInsets.only(
                                     top: mediaQuery.height * 0.05,
                                     right: mediaQuery.width * 0.1),
+                                decoration: BoxDecoration(
+                                    color: Colors.red, shape: BoxShape.circle),
                                 width: 50,
                                 height: 50,
                               ))
@@ -123,7 +145,7 @@ class _BLuetoothDiscoverDeviceState extends State<BLuetoothDiscoverDevice> {
               ),
               StreamBuilder<BLUETOOTH_SCAN_STATE>(
                 stream: this._bluetoothBloc.scanFlag.stream,
-                // initialData: BLUETOOTH_SCAN_STATE.RE_SCAN,
+                initialData: BLUETOOTH_SCAN_STATE.OK_FOUNDED,
                 builder: (BuildContext context,
                     AsyncSnapshot<BLUETOOTH_SCAN_STATE> snapshot) {
                   if (snapshot.data == BLUETOOTH_SCAN_STATE.OK_FOUNDED) {
@@ -135,18 +157,18 @@ class _BLuetoothDiscoverDeviceState extends State<BLuetoothDiscoverDevice> {
                           margin: EdgeInsets.only(top: mediaQuery.height * 0.6),
                           child: RaisedButton(
                             onPressed: () async {
-                              if (await this._bluetoothBloc.connectToDevice()) {
+                              if (await this._bluetoothBloc.connectToDevice() || await this.checkPairedDevices()) {
                                 await this._bluetoothBloc.cleenUpResoruce();
                                 print("Paring went OK");
-                                await Navigator.popAndPushNamed(context, AppRouting.homePage);
-
+                                await Navigator.popAndPushNamed(
+                                    context, AppRouting.homePage);
                               }
                             },
                             color: Colors.white,
                             child: Text(
                               "Connect To Decvice".toUpperCase(),
                               style: TextStyle(
-                                  fontSize: mediaQuery.width * 0.05,
+                                  fontSize: mediaQuery.width * 0.043,
                                   fontWeight: FontWeight.bold),
                             ),
                             shape: RoundedRectangleBorder(

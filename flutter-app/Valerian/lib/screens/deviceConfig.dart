@@ -9,6 +9,7 @@ import 'package:Valerian/ultis/globalPreferences.dart';
 import 'package:flutter/material.dart';
 import 'package:clay_containers/clay_containers.dart';
 import 'package:foreground_service/foreground_service.dart';
+// import 'package:foreground_service/foreground_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 
@@ -72,6 +73,38 @@ class _DeviceScrrenState extends State<DeviceScrren> {
 
   }
 
+  Future<void> callMethodChannel(String eState) async{
+    bool buttonState = this.localPersistentData[this.sestingSwicth(eState)];
+    String buttonOpCode = this.sestingSwicth(eState);
+    if (buttonState) {
+      switch (buttonOpCode) {
+        case "dection":
+          await ForegroundService.start( title: 'Valerain',text: 'Background Ground Processing',subText: 'Do not close',ticker: 'Ticker',);
+          break;
+        case "notification":
+          await ForegroundService.startNotifcation();
+          break;
+        default:
+      }
+    }else{
+
+      print("DEBUG MODE WITH BUTTON");
+      switch (buttonOpCode) {
+        case "dection":
+          await ForegroundService.stop();
+          break;
+        case "notification":
+          await ForegroundService.stop();
+          break;
+        default:
+      }
+    }
+  }
+
+  Future<void> onOffMethodChannelCall(bool){
+    
+  }
+
   String pressed;
   @override
   Widget build(BuildContext context) {
@@ -92,27 +125,7 @@ class _DeviceScrrenState extends State<DeviceScrren> {
                     ...uiIcon.keys.map((e) => GestureDetector(
                             onDoubleTap: () async => {
                                   await toggleButton(e),
-                                  await ForegroundService.stop(),
-                                  // FlutterBluetoothSerial.instance.cancelDiscovery(),
-                                  // await FlutterBluetoothSerial.instance.disconnect(),
-                                  // FlutterBluetoothSerial.instance.
-                                  // FlutterBluetoothSerial.instance.
-                                  // wifiDialog(context);
-                                  print("OK"),
-                                  if (this.sestingSwicth(e) == "notification") {
-                                    await ForegroundService.startNotifcation()
-                                  }else{
-                                  await ForegroundService.start(
-                                    title: 'Valerain',
-                                    text: 'Background Ground Processing',
-                                    subText: 'Do not close',
-                                    ticker: 'Ticker',
-                                  ),
-                                  },
-
-
-                                  print("Done"),
-
+                                  await callMethodChannel(e),
                                   setState(() {
                                     // this.pressed = e;
                                   }),
