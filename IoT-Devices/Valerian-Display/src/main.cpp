@@ -60,6 +60,8 @@ void displayConfig(String mesges, int opCode)
   else if (opCode == TEXT)
   {
     Serial.printf("Me may\n");
+    Serial.println(mesges);
+    showMessenge(mesges);
   }
   else if (opCode == DECTION)
   {
