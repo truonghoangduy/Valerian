@@ -1,16 +1,21 @@
 package com.pauldemarco.foregroundservice;
+import static android.service.notification.NotificationListenerService.requestRebind;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -35,6 +40,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 public class ForegroundServicePlugin implements MethodCallHandler {
   private static final String TAG = "ForegroundServicePlugin";
   private static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
+  private static final String COMPONENT_NLSERVICE = ".ForegroundService";
   public static String STARTFOREGROUND_ACTION = "com.pauldemarco.foregroundservice.action.startforeground";
   public static String STOPFOREGROUND_ACTION = "com.pauldemarco.foregroundservice.action.stopforeground";
   private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
@@ -87,7 +93,7 @@ public class ForegroundServicePlugin implements MethodCallHandler {
       intentFilter.addAction(ForegroundService.NOTIFICATION_INTENT);
       Intent notification_intent = new Intent();
       notification_intent.setAction(ACTION_NOTIFICATION_LISTENER);
-//      activity.startActivity(notification_intent);
+//      activity.startService(notification_intent);
 
       Intent intent = new Intent(this.activity, ForegroundService.class);
       intent.setAction(STARTFOREGROUND_ACTION);
@@ -111,8 +117,8 @@ public class ForegroundServicePlugin implements MethodCallHandler {
       result.success(null);
     }else if(
 
-            METHOD_CHANNEL_CALL.valueOf(call.method).equals(METHOD_CHANNEL_CALL.START_NOTIFICATION.getMethod())
-
+//            METHOD_CHANNEL_CALL.valueOf(call.method).equals(METHOD_CHANNEL_CALL.START_NOTIFICATION.getMethod())
+            call.method.equals("start_notifcation")
     ){
 
 
@@ -121,13 +127,45 @@ public class ForegroundServicePlugin implements MethodCallHandler {
 
         this.activity.startActivityForResult(new Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS),0);
       }else {
-        this.activity.bindService(new Intent(ACTION_NOTIFICATION_LISTENER),foregroundServices_connection, Context.BIND_AUTO_CREATE);
+        Log.d(TAG,String.valueOf(isNLServiceRunning()));
+        Log.d(TAG,"🔔 permission is Given 🔥");
+        enableNotificationListenerService(this.activity);
+//        this.activity.bindService(new Intent(ACTION_NOTIFICATION_LISTENER),foregroundServices_connection, Context.BIND_AUTO_CREATE);
       }
+      result.success(null);
+
     }
     else {
       result.notImplemented();
     }
 
+  }
+
+  private boolean isNLServiceRunning() {
+    ActivityManager manager = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
+    for (ActivityManager.RunningServiceInfo service :
+            manager.getRunningServices(Integer.MAX_VALUE)) {
+      if (ForegroundService.class.getName().equals(service.service.getClassName())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public void enableNotificationListenerService(Context context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      ComponentName foreground_name = new ComponentName(context,ForegroundService.class);
+      requestRebind(foreground_name);
+      Log.d(TAG,"Request to Rebind Services");
+//      NotificationListenerService.requestRebind(new ComponentName(context.getPackageName(),
+////              ForegroundService.class.getName()));
+    } else {
+      PackageManager pm = context.getPackageManager();
+      pm.setComponentEnabledSetting(new ComponentName(context.getPackageName(),
+                      COMPONENT_NLSERVICE),
+              PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+              PackageManager.DONT_KILL_APP);
+    }
   }
 
   private boolean permissionGiven() {
