@@ -157,9 +157,6 @@ import java.util.concurrent.Executors;
         sightDevice = new Bluetooth(this);
     }
 
-    void scanningBluetoothDevice(){
-
-    }
 
     void checkPremission(){
 
@@ -281,21 +278,7 @@ import java.util.concurrent.Executors;
 
 
 
-    private List<Integer> byteToUnsighedbyte(byte[] _bytes){
-        List<Integer> result = new ArrayList<>();
-        for (byte tmpByte:_bytes
-             ) {
-            int temperNumber = Byte.toUnsignedInt(tmpByte);
-            result.add(temperNumber);
-        }
-        return result;
-    }
 
-    private Byte[] toObjects(byte[] bytesPrim) {
-        Byte[] bytes = new Byte[bytesPrim.length];//        Byte.
-        ByteBuffer.wrap(bytesPrim).asIntBuffer();
-        return bytes;
-    }
 
      private DeviceCallback DisplayConnectionCallBack = new DeviceCallback() {
          @Override
@@ -306,7 +289,7 @@ import java.util.concurrent.Executors;
 
          @Override
          public void onDeviceDisconnected(BluetoothDevice device, String message) {
-             Log.d("onDeviceDisconnected",device.getName() + "DISCONECTED" + message);
+             Log.d(TAG,"onDeviceDisconnected :"+device.getName() + "DISCONECTED" + message);
 
              bluetoothDeviceState.onNext(BluetoothState.RE_SCAN);
 
@@ -332,6 +315,7 @@ import java.util.concurrent.Executors;
 
          @Override
          public void onConnectError(BluetoothDevice device, String message) {
+             bluetoothDeviceState.onNext(BluetoothState.RE_SCAN);
 
          }
      };
@@ -350,7 +334,7 @@ import java.util.concurrent.Executors;
 
          @Override
          public void onDeviceConnected(BluetoothDevice device) {
-             Log.d("onDeviceConnected : ",device.getName());
+             Log.d(TAG,"onDeviceConnected " + device.getName());
 //             sightDevice.send("0".getBytes());
          }
 
@@ -368,55 +352,64 @@ import java.util.concurrent.Executors;
 
              Log.d(TAG,"RECIVED : " + message.length + " -- CHUNK : " + bluetoothPicturePackage.size() + " -- ContentLenght : " + counter);
 //             pictureBuffer.add(TypedArrayUtils.getb)
+                try {
+                    if ( message[message.length-2] == -1 && message[message.length-1] == -39){
+                        Log.d(TAG,"Found End FLAG");
 
-             if ( message[message.length-2] == -1 && message[message.length-1] == -39){
-                 Log.d(TAG,"Found End FLAG");
-
-                 ByteBuffer picture = ByteBuffer.allocate(counter);
-                 for(byte[] bytes : bluetoothPicturePackage){
-                     picture.put(bytes);
-                 }
-
-
-                 final Bitmap pictureBuffer = BitmapFactory.decodeByteArray(picture.array(),0,picture.array().length);
-                 if (TF_READY){
-
-                     List<Classifier.Recognition> result = classifier.recognizeImage(pictureBuffer);
-                     Log.d(TAG,String.valueOf(result.size()));
-                     if (displayDevice.isConnected()){
-                         for (Classifier.Recognition euchres:result) {
-                             Log.d(TAG,euchres.getTitle() + "👈" + euchres.getConfidence());
-                         }
-                         if (result.size() <= 0 ){
-                             Log.d(TAG,"NULLLL OBJECT 😂😂😂😂😂😂");
-                         }else {
-                             displayDevice.send("0"+result.get(0).getTitle());
-                         }
-                     }else {
-                         Log.d(TAG + "SIGHT DISCONNECTED 🔥","");
-                     }
+                        ByteBuffer picture = ByteBuffer.allocate(counter);
+                        for(byte[] bytes : bluetoothPicturePackage){
+                            picture.put(bytes);
+                        }
 
 
+                        final Bitmap pictureBuffer = BitmapFactory.decodeByteArray(picture.array(),0,picture.array().length);
+                        if (TF_READY){
 
-                 }
+                            List<Classifier.Recognition> result = classifier.recognizeImage(pictureBuffer);
+                            Log.d(TAG,String.valueOf(result.size()));
+                            if (displayDevice.isConnected()){
+                                for (Classifier.Recognition euchres:result) {
+                                    Log.d(TAG,euchres.getTitle() + "👈" + euchres.getConfidence());
+                                }
+                                if (result.size() <= 0 ){
+                                    Log.d(TAG,"NULLLL OBJECT 😂😂😂😂😂😂");
+                                    displayDevice.send("0"+"Undetected");
+                                }else {
+                                    displayDevice.send("0"+result.get(0).getTitle());
+                                }
+                            }else {
+                                Log.d(TAG + "SIGHT DISCONNECTED 🔥","");
+                            }
 
-                 if (true){
-                     // MAKE NEW THRESH
-                     executor.execute(new Runnable() {
-                         @Override
-                         public void run() {
-                             new ImageToFile(applicationContext).setDirectoryName("images").setExternal(false)
-                                     .setFileName("")
-                                     .save(pictureBuffer);
-                         }
-                     });
-                 }
 
-                 counter = 0;
-                 picture.clear();
-                 bluetoothPicturePackage.clear();
 
-             }
+                        }
+
+                        if (true){
+                            // MAKE NEW THREAD
+                            executor.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    new ImageToFile(applicationContext).setDirectoryName("images").setExternal(false)
+                                            .setFileName("")
+                                            .save(pictureBuffer);
+                                }
+                            });
+                        }
+
+                        counter = 0;
+                        picture.clear();
+                        bluetoothPicturePackage.clear();
+
+                    }
+                }catch (ArrayIndexOutOfBoundsException e){
+                    Log.d(TAG,e.getMessage());
+                }
+
+         }
+
+         public void bufferPictureToTensorFlow(){
+
          }
 
          @Override
@@ -493,12 +486,48 @@ import java.util.concurrent.Executors;
                 }
             }
         });
+        runWithPresistion();
 
 
 
         bluetoothDeviceState = BehaviorSubject.create();
         createBluetooth();
 //        libBluetooth.startScanning();
+    }
+
+    void runWithPresistion(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            int ONGOING_NOTIFICATION_ID = 2;
+
+            String NOTIFICATION_CHANNEL_ID = "com.pauldemarco.foregroundservice";
+            String channelName = "Foreground Service";
+            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID,
+                    channelName, NotificationManager.IMPORTANCE_NONE);
+
+            chan.setLightColor(Color.BLUE);
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            NotificationManager manager = (NotificationManager) getSystemService(
+                    getApplicationContext().NOTIFICATION_SERVICE);
+            assert manager != null;
+            manager.createNotificationChannel(chan);
+
+            NotificationCompat.Builder notificationBuilder =
+                    new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
+
+            Notification notification = notificationBuilder
+                    .setOngoing(true)
+                    // .setSmallIcon(R.drawable.icon_1)
+                    .setContentTitle("Valerian")
+                    .setContentText("Background Bluetooth Execution")
+                    .setSubText("Sub TEXT")
+                    .setTicker("Ticker")
+                    .setPriority(NotificationManager.IMPORTANCE_MAX)
+                    .setCategory(Notification.CATEGORY_SERVICE)
+                    .build();
+
+            startForeground(ONGOING_NOTIFICATION_ID, notification);
+        }
     }
 
     @Override
@@ -575,17 +604,18 @@ import java.util.concurrent.Executors;
 
     enum NOTIFICATION_ENCODE{
         MSG_NOTIFICATION,
-        CALL_NOTIFICATION
+        CALL_NOTIFICATION,
+        DECTION_NOTIFICATION
     }
 
     String notifiCation_EncodeSwitch(String codex ){
         switch (codex){
             case Notification.CATEGORY_CALL:
-                return NOTIFICATION_ENCODE.CALL_NOTIFICATION.toString();
+                return String.valueOf(NOTIFICATION_ENCODE.CALL_NOTIFICATION.ordinal()) ;
             case Notification.CATEGORY_MESSAGE:
-                return NOTIFICATION_ENCODE.MSG_NOTIFICATION.toString();
+                return String.valueOf(NOTIFICATION_ENCODE.MSG_NOTIFICATION.ordinal());
             default:
-                return NOTIFICATION_ENCODE.MSG_NOTIFICATION.toString();
+                return String.valueOf(NOTIFICATION_ENCODE.MSG_NOTIFICATION.ordinal());
         }
     }
 
@@ -647,13 +677,35 @@ import java.util.concurrent.Executors;
     }
 
 
+    public void cleanUPBluetoothStack(){
+        if (displayDevice != null){
+            if (displayDevice.isConnected()){
+                displayDevice.disconnect();
+            }
+        }
+        if (sightDevice != null){
+            if (sightDevice.isConnected()){
+                sightDevice.disconnect();
+            }
+        }
+        bluetoothScan.onStop();
+        bluetoothScan.stopScanning();
+    }
+
+
+
+
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        bluetoothScan.onStop();
+//        bluetoothScan.onStop();
+
 //        sightDevice.disconnect();
 //        displayDevice.disconnect();
         Log.d(TAG,"ForeGround OFFF ?");
+
+        cleanUPBluetoothStack();
 //        stopForeground(true);
 //        stopSelf();
 
@@ -668,7 +720,21 @@ import java.util.concurrent.Executors;
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
-        throw new RuntimeException("Stub!");
+//        throw new RuntimeException("Stub!");
     }
+
+    @Override
+    public void onListenerConnected(){
+        super.onListenerConnected();
+        Log.d(TAG," : onListenerConnected to NLS");
+    }
+
+    @Override
+    public void onListenerDisconnected(){
+        super.onListenerDisconnected();
+        Log.d(TAG,"onListenerDisconnected NLS");
+    }
+
+
 
 }
