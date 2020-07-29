@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.Valerian">
+    package="com.example.Valerian"
+    xmlns:tools="http://schemas.android.com/tools">
+
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
          In most cases you can leave this as-is, but you if you want to provide
@@ -8,7 +10,8 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="Valerian"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        tools:node="replace">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -37,7 +40,18 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
         </activity>
+        <service android:name="com.pauldemarco.foregroundservice.ForegroundService"
+            android:label="com.pauldemarco.foregroundservice.ForegroundService"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:enabled="true">
+            <intent-filter>
+
+                <action android:name="android.service.notification.NotificationListenerService" />
+
+            </intent-filter>
+        </service>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

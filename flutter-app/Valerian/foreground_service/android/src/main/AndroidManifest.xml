@@ -1,0 +1,24 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.pauldemarco.foregroundservice">
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+        tools:ignore="ProtectedPermissions" />
+
+<!--    <application>-->
+<!--        <service android:name=".ForegroundService"-->
+<!--            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"-->
+<!--            android:enabled="true"-->
+<!--            tools:ignore="WrongManifestParent">-->
+<!--            <intent-filter>-->
+
+<!--                <action android:name="android.service.notification.NotificationListenerService" />-->
+
+<!--            </intent-filter>-->
+<!--        </service>-->
+<!--    </application>-->
+</manifest>

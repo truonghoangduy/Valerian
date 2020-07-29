@@ -1,0 +1,73 @@
+group 'com.pauldemarco.foregroundservice'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext {
+        compileSdkVersion   = 28                // or higher
+        targetSdkVersion    = 28                // or higher
+        supportLibVersion   = "1.0.2"           // or higher
+    }
+
+    repositories {
+        jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.3'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 26
+        targetSdkVersion 28
+
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    aaptOptions {
+        noCompress "tflite"
+        noCompress "lite"
+    }
+    dependencies {
+        implementation "androidx.appcompat:appcompat:1.1.0"
+        implementation 'me.aflak.libraries:bluetooth:1.3.9'
+        implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+        // Because RxAndroid releases are few and far between, it is recommended you also
+        // explicitly depend on RxJava's latest version for bug fixes and new features.
+        // (see https://github.com/ReactiveX/RxJava/releases for latest 3.x.x version)
+        implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
+        implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+        implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
+
+    }
+
+}
