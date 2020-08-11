@@ -1,17 +1,4 @@
 #include <Arduino.h>
-// #include <esp_camera.h>
-// #include <BLEDevice.h>
-// #include <BLEServer.h>
-// #include <BLEUtils.h>
-// #include <BLE2902.h>
-// #include <camera_pins.h>
-// #include <esp_camera.h>
-// #include <http_server_linker.h>
-// #include <ArduinoJson.h>
-// #include <SPIFFS.h>
-// #include <WiFi.h>
-// #include <ESPmDNS.h>
-// #include <esp_http_server.h>
 #include "soc/soc.h" //disable brownout problems
 #include "soc/rtc_cntl_reg.h"
 #include "OneButton.h"
@@ -41,30 +28,36 @@ BluetoothSerial SerialBT;
 
 char stop = '\n';
 
-enum Board_State
-{
-  NOTIFICATION,
-  TEXT,
-  DECTION
-} Board_State;
-
 void displayConfig(String mesges, int opCode)
 {
 
-  if (opCode == NOTIFICATION)
+  if (opCode == MSG_NOTIFICATION)
   {
-    Serial.printf("Hello\n");
+    if (mesges.length() < 16)
+    {
+      Serial.printf("DECTION_NOTIFICATION");
+      Serial.println(mesges);
+      showDisplay(mesges);
+    }
+    else
+    {
+      /* code */
+      Serial.printf("MSG_NOTIFICATION");
+      Serial.println(mesges);
+      showMessenge(mesges, MSG_NOTIFICATION);
+    }
+  }
+  else if (opCode == CALL_NOTIFICATION)
+  {
+    Serial.printf("CALL_NOTIFICATION");
     Serial.println(mesges);
-    // showDisplay(mesges);
-    // showDisplay();
+    showMessenge(mesges, CALL_NOTIFICATION);
   }
-  else if (opCode == TEXT)
+  else if (opCode == DECTION_NOTIFICATION)
   {
-    Serial.printf("Me may\n");
-  }
-  else if (opCode == DECTION)
-  {
-    Serial.printf("Fuck u\n");
+    Serial.printf("DECTION_NOTIFICATION");
+    Serial.println(mesges);
+    showDisplay(mesges);
   }
 }
 
@@ -87,11 +80,11 @@ void btCallback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
     displayConfig(mesges.substring(1), opCode);
     // testdrawtext((char *)mesges.c_str(),ST7735_WHITE);
     // Serial.println((char *)param->data_ind.data);   // setCameraParam(paramInt);
-  }else if(event == ESP_SPP_CLOSE_EVT ){
+  }
+  else if (event == ESP_SPP_CLOSE_EVT)
+  {
     Serial.println("Client disconnected");
   }
-  
-  
 }
 
 void initBT()
@@ -113,15 +106,16 @@ void callBackLongPressStop()
 {
 
   Serial.println("hello");
-  Serial.println(sizeof(DECTION));
+  Serial.println(sizeof(DECTION_NOTIFICATION));
   if (SerialBT.hasClient())
   {
     Serial.println("Send Messages");
-    int encode = (int) DECTION;
+    int encode = (int)DECTION_NOTIFICATION;
     // SerialBT.write((uint8_t *)&encode, sizeof(encode));
     // SerialBT.write((uint8_t *)&EOL, sizeof(EOL));
     // SerialBT.write((uint8_t *)&stop, sizeof(stop));
-    SerialBT.println(encode);SerialBT.flush();
+    SerialBT.println(encode);
+    SerialBT.flush();
   }
 }
 void callBackDuringLongPressStop()
@@ -137,11 +131,7 @@ void setup()
   Serial.setDebugOutput(true);
 
   pinMode(INPUT_PINS, OUTPUT);
-
-  // Serial.println("The device started, now you can pair it with bluetooth!");
-  // displaysetup();
-  // showDisplay();
-  // delay(2000);
+  displaysetup();
   initBT();
   oneButton.setDebounceTicks(2000);
   oneButton.setPressTicks(2000);
@@ -168,169 +158,3 @@ void loop()
   // }
   // delay(20);
 }
-
-// enum BLUE_MESSAGE
-// {
-
-// };
-// void initBluetoothSerial()
-// {
-//   if (!SerialBT.begin("valarian-sight"))
-//   {
-//     Serial.println("Bluetooth Serial not Init");
-//     ESP.restart();
-//   }
-//   else
-//   {
-//     Serial.println("Bluetooth Serial Initalized");
-//   }
-//   // blueSerial.register_callback()
-// }
-// void writeSerialBT(camera_fb_t *fb)
-// {
-//   SerialBT.write(fb->buf, fb->len); // Queue package alreay implemented
-//   SerialBT.flush();
-// }
-
-// // esp_spp_cb_event_t Enum for Bluetooth SerialCallBack type
-// void blueCallBack(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
-// {
-//   if (event == ESP_SPP_OPEN_EVT)
-//   {
-//     /* code */
-//   }
-//   else if (event = ESP_SPP_DATA_IND_EVT) // client send request
-//   {
-//     // param->data_ind.data
-//     String messege = String(*param->data_ind.data); // * *uint8_t => char
-//     Serial.println(messege);
-//   }
-// }
-// void capture()
-// {
-//   camera_fb_t *fb = NULL;
-//   esp_err_t res = ESP_OK;
-//   fb = esp_camera_fb_get();
-//   if (!fb)
-//   {
-//     esp_camera_fb_return(fb);
-//     return;
-//   }
-
-//   if (fb->format != PIXFORMAT_JPEG)
-//   {
-//     return;
-//   }
-
-//   writeSerialBT(fb);
-//   esp_camera_fb_return(fb);
-// }
-// void setCameraParam(int paramInt)
-// {
-//   sensor_t *s = esp_camera_sensor_get();
-//   switch (paramInt)
-//   {
-//   case 4:
-//     s->set_framesize(s, FRAMESIZE_UXGA);
-//     break;
-
-//   case 3:
-//     s->set_framesize(s, FRAMESIZE_SXGA);
-//     break;
-
-//   case 2:
-//     s->set_framesize(s, FRAMESIZE_XGA);
-//     break;
-
-//   case 1:
-//     s->set_framesize(s, FRAMESIZE_SVGA);
-//     break;
-
-//   case 0:
-//   default:
-//     s->set_framesize(s, FRAMESIZE_VGA);
-//     break;
-//   }
-
-//   capture();
-// }
-
-// void btCallback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
-// {
-//   if (event == ESP_SPP_SRV_OPEN_EVT)
-//   {
-//     Serial.println("Client Connected!");
-//   }
-//   else if (event == ESP_SPP_DATA_IND_EVT)
-//   {
-//     Serial.printf("ESP_SPP_DATA_IND_EVT len=%d, handle=%d\n\n", param->data_ind.len, param->data_ind.handle);
-//     String stringRead = String(*param->data_ind.data);
-//     int paramInt = stringRead.toInt() - 48;
-//     Serial.printf("paramInt: %d\n", paramInt);
-//     setCameraParam(paramInt);
-//   }
-// }
-
-// void initBT()
-// {
-//   if (!SerialBT.begin("Valerian-Sight"))
-//   {
-//     Serial.println("An error occurred initializing Bluetooth");
-//     ESP.restart();
-//   }
-//   else
-//   {
-//     Serial.println("Bluetooth initialized");
-//   }
-
-//   SerialBT.register_callback(btCallback);
-//   Serial.println("The device started, now you can pair it with bluetooth");
-// }
-
-// void handleMessage(String message)
-// {
-// }
-// void setup()
-// {
-//   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
-
-//   Serial.begin(115200);
-//   Serial.setDebugOutput(true);
-//   Serial.println("Hello World");
-//   Serial.print("Heap");
-//   Serial.println(ESP.getFreeHeap());
-//   pinMode(4, INPUT);
-
-//   initCamera_Config();
-//   delay(500);
-//   pinMode(22, INPUT);
-//   digitalWrite(22, LOW);
-
-//   esp_err_t err = esp_camera_init(&camera_config);
-//   if (err != ESP_OK)
-//   {
-//     Serial.printf("Camera init failed with error 0x%x", err);
-//     return;
-//   }
-//   Serial.print("Heap Init CAM config");
-//   Serial.println(ESP.getFreeHeap());
-//   Serial.println("Init Cam Sussesfully");
-//   initBT();
-// }
-
-// void loop()
-// {
-// }
-
-//   for (size_t i = 0; i < fb->len; i++)
-//   {
-
-//     buffer = *(fb->buf + i);
-// #ifdef DEBUG_BUFFER
-//     Serial.print(buffer);
-//     Serial.print(" ");
-// #endif
-//     pCharacteristic->setValue(&buffer,1);
-//     pCharacteristic->notify();
-//     delay(70);
-//   }

@@ -5,63 +5,521 @@
 #include "TFT_eSPI.h"
 // #include "bitPicture.h"
 #include "strings.h"
+#include <animationGIF.h>
+#include "Wire.h"
+enum Board_State
+{
+  MSG_NOTIFICATION,
+  CALL_NOTIFICATION,
+  DECTION_NOTIFICATION
+} Board_State;
 
 TFT_eSPI tft = TFT_eSPI();
 
 // #include <Fonts/miror20pt7bBitmaps.h>
 #include <Fonts/miror10pt7b.h>
 
-// const GFXfont myfont PROGMEM ={
-// 	(uint8_t *)25537_miror20pt7b
-// }
-
-String Variablel = "car";
-
 void displaysetup()
 {
 	tft.init();
 	tft.begin();
 	tft.setRotation(1);
-}
-void testdrawrects(uint16_t color)
-{
 	tft.fillScreen(TFT_BLACK);
-	for (int16_t x = 0; x < 50; x += 6)
+}
+String wrap(String s, int limit)
+{
+	int space = 0;
+	int i = 0;
+	int line = 0;
+	while (i < s.length())
 	{
-		tft.drawRect(50 / 2 - x / 2, 50 / 2 - x / 2, x, x, color);
-		delay(100);
+		if (s.substring(i, i + 1) == " ")
+		{
+			space = i;
+		}
+		if (line > limit - 1)
+		{
+			s = s.substring(0, space) + "~" + s.substring(space + 1);
+			line = 0;
+		}
+		i++;
+		line++;
+	}
+	s.replace("~", "\n");
+	return s;
+}
+
+void cleanDisplay(){
+	tft.fillScreen(TFT_BLACK);
+}
+
+
+void showAmimation_MSG_NOTIFICATION()
+{
+	int xx = 0;
+	int yy = 0;
+	int tt = 100;
+	for (int c = 0; c <= 1; c++)
+	{
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter0, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter1, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter2, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter3, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter4, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter5, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter6, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter7, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter8, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter9, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter10, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter11, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter12, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter13, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter14, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter15, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter16, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter17, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter18, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter19, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter20, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter21, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter22, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter23, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter24, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter25, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter26, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Letter27, 48, 48, 1);
+
+		delay(tt);
 	}
 }
-void testfillrects(uint16_t color1, uint16_t color2)
+
+void showAmimation_CALL_NOTIFICATION()
 {
-	tft.fillScreen(TFT_BLACK);
-	for (int16_t x = tft.width() - 1; x > 6; x -= 6)
+	int xx = 0;
+	int yy = 0;
+	int tt = 100;
+	tft.setCursor(7, 35);
+
+	for (int e = 1; e < 3; e++)
 	{
-		tft.fillRect(tft.width() / 2 - x / 2, tft.height() / 2 - x / 2, x, x, color1);
-		tft.drawRect(tft.width() / 2 - x / 2, tft.height() / 2 - x / 2, x, x, color2);
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone0, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone1, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone2, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone3, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone4, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone5, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone6, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone7, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone8, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone9, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone10, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone11, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone12, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone13, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone14, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone15, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone16, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone17, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone18, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone19, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone20, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone21, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone22, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone23, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone24, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone25, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone26, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Phone27, 48, 48, 1);
+
+		delay(tt);
+	}
+
+}
+
+void showAmimation_DECTION_NOTIFICATION(){
+	int xx = 0;
+	int yy = 0;
+	int tt = 60;
+	tft.setCursor(7, 35);
+	for (int c = 1; c < 3; c++)
+	{
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect0, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect1, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect2, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect3, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect4, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect5, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect6, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect7, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect8, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect9, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect10, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect11, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect12, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect13, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect14, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect15, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect16, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect17, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect18, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect19, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect20, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect21, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect22, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect23, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect24, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect25, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect26, 48, 48, 1);
+
+		delay(tt);
+
+		tft.fillScreen(TFT_WHITE);
+		tft.drawBitmap(xx, yy, Connect27, 48, 48, 1);
+
+		delay(tt);
 	}
 }
 
 void showDisplay(String message)
 {
-	
+	showAmimation_DECTION_NOTIFICATION();
+	tft.setCursor(7, 35);
 
-	// Set text colour to orange with black background
 
-	tft.fillScreen(TFT_RED); // Clear screen
-							 // tft.setTextFont(&FreeMono9pt7b);
-							 // bool flip = false;			   // Select the font
-	/* code */
-	// flip =!flip;
-	// tft.invertDisplay(flip);
-	// tft.writedata(TFT_MAD_MX | TFT_MAD_BGR);
-	// tft.setAttribute
-	// tft.drawString("person dog tv bed", 0, 0);
+	tft.fillScreen(TFT_RED);
 
-	// delay(3000);
+	tft.drawRoundRect(2, 2, 80, 80, 10, TFT_SILVER);
+
+	tft.fillRect(2, 0, 80, 80, TFT_BLACK);
+	tft.setTextWrap(false, true);
 
 	tft.setFreeFont(&miror10pt7b);
 	tft.setTextSize(0);
+	tft.setCursor(7, 30);
 
 	int start = 0;
 	int end = message.length();
@@ -79,181 +537,77 @@ void showDisplay(String message)
 	revesttext[end] = '\0'; // ARHHHHH !!! THE BUGGG IS FOUND
 
 	Serial.println((char *)revesttext);
-	tft.setCursor(15,40);
-	tft.println(revesttext);
-	// tft.setCursor(10, 20);
+	tft.setTextColor(TFT_WHITE);
 
-	// tft.println(Variablel.reserve(30));
-	// Serial.println(Variablel.l);
+	String myString = String(revesttext);
+	tft.setCursor(10, 20);
+	tft.println(wrap(myString, 5));
 
-	// Print the string name of the font
-	// delay(3000);
-	// tft.fillScreen(TFT_YELLOW);
-	// delay(3000);
-	// // tft.setAddrWindow()
-	// // for (size_t i = 0; i < 5050; i++)
-	// // {
-	// // 	/* code */
-	// // }
+	delay(5000);
+	// tft.fillScreen(TFT_RED);
+	cleanDisplay();
 
-	// // tft.drawBitmap(0,0,bellicon,50,50,TFT_BLACK,TFT_GREEN);
-	// // tft.drawXBitmap(0,0,bellicon,50,50,TFT_BLUE);
-	// testdrawrects(TFT_RED);
-	// 	delay(3000);
-	// testfillrects(TFT_BLUE,TFT_DARKGREEN);
 }
+void showMessenge(String message, int opCode)
+{
+	if (opCode == MSG_NOTIFICATION)
+	{
+		showAmimation_MSG_NOTIFICATION();
+	}else if(opCode == CALL_NOTIFICATION )
+	{
+		showAmimation_CALL_NOTIFICATION();
+	}
+	tft.fillScreen(TFT_BLUE);
+	tft.drawRoundRect(2, 2, 80, 80, 10, TFT_VIOLET);
 
-// #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-// #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
-// BLEServer *pServer = NULL;
-// BLECharacteristic *pCharacteristic = NULL;
-// bool deviceConnected = false;
-// camera_fb_t *fb = NULL;
-// bool capture()
-// {
-// 	fb = esp_camera_fb_get();
-// 	if (!fb)
-// 	{
-// 		Serial.println("Camera capture failed");
-// 		return false;
-// 	}
-// 	return true;
-// }
-// class MyServerCallbacks : public BLEServerCallbacks
-// {
-// 	void onConnect(BLEServer *pServer)
-// 	{
-// 		Serial.println("BLE Client Connected");
-// 		Serial.println(pServer->getConnId());
-// 		deviceConnected = true;
-// 		BLEDevice::startAdvertising();
-// 	};
+	tft.fillRect(2, 0, 80, 80, TFT_WHITE);
+	tft.setTextWrap(false, true);
 
-// 	void onDisconnect(BLEServer *pServer)
-// 	{
-// 		deviceConnected = false;
-// 	}
-// };
+	tft.setFreeFont(&miror10pt7b);
+	tft.setTextSize(0);
+	tft.setCursor(7, 30);
 
-// // BLE Section
-// BLEDevice::init("ESP32 Valarien Sight");
+	int start = 0;
+	int end = message.length();
 
-// pServer = BLEDevice::createServer();
+	char revesttext[end];
 
-// pServer->setCallbacks(new MyServerCallbacks());
-// // Create the BLE Service
-// BLEService *pService = pServer->createService(SERVICE_UUID);
-// // Create a BLE Characteristic
-// pCharacteristic = pService->createCharacteristic(
-// 	CHARACTERISTIC_UUID,
-// 	BLECharacteristic::PROPERTY_READ |
-// 		BLECharacteristic::PROPERTY_WRITE |
-// 		BLECharacteristic::PROPERTY_NOTIFY |
-// 		BLECharacteristic::PROPERTY_INDICATE);
-// pCharacteristic->addDescriptor(new BLE2902());
+	for (int i = end - 1; i > -1; i--)
+	{
+		Serial.println(message.charAt(i));
+		revesttext[start] = message.charAt(i);
+		Serial.println(revesttext[start]);
+		start += 1;
+	}
+	Serial.println((char *)revesttext);
+	revesttext[end] = '\0'; // ARHHHHH !!! THE BUGGG IS FOUND
 
-// BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-// pAdvertising->addServiceUUID(SERVICE_UUID);
-// pAdvertising->setScanResponse(false);
-// pAdvertising->setMinPreferred(0x0); // set value to 0x00 to not advertise this parameter
-// BLEDevice::startAdvertising();
-// Serial.println("Waiting a client connection to notify...");
+	Serial.println((char *)revesttext);
+	tft.setTextColor(TFT_BLACK);
+	//tft.println(revesttext);
+	tft.setTextWrap(true);
+	int x = tft.width() / 32;
+	int minX = -7 * strlen(revesttext);
+	for (int d = 50; d > 0; d--)
+	{
 
-// 	#include <Wire.h>
+		tft.setTextColor(TFT_WHITE);
+		tft.setCursor(x, 20);
+		tft.fillScreen(TFT_BLACK);
 
-// #include <Arduino.h>
-// // #include <Adafruit_GFX.h>    // Core graphics library
-// // #include <Adafruit_ST7735.h> // Hardware-specific library for ST7735
-// // #include <Adafruit_ST77xx.h>
-// // #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
-// #include <SPI.h>
-// #include <TFT_eSPI.h>
+		tft.println(revesttext);
 
-// #include "bitPicture.h";
-// // #include "showText.h";
-// // #define TRACKING
+		// tft.fillRect(80, 0, 80, 90, TFT_BLUE);
+		x = x + 4;
+		if (x < minX)
+			x = tft.width() / 32;
+		delay(100);
+	}
 
-// #define ARDUINO_FEATHER_ESP32
-// #if defined(ARDUINO_FEATHER_ESP32) // Feather Huzzah32
-//   #define TFT_CS         5
-//   #define TFT_RST        2
-//   #define TFT_DC         4
+	// String myString = String(revesttext);
+	// tft.setCursor(10, 20);
+	// tft.println(wrap(myString, 5));
 
-// #elif defined(ESP8266)
-//   #define TFT_CS         4
-//   #define TFT_RST        16
-//   #define TFT_DC         5
-
-// #else
-//   // For the breakout board, you can use any 2 or 3 pins.
-//   // These pins will also work for the 1.8" TFT shield.
-//   #define TFT_CS        10
-//   #define TFT_RST        9 // Or set to -1 and connect to Arduino RESET pin
-//   #define TFT_DC         8
-// #endif
-
-// // OPTION 1 (recommended) is to use the HARDWARE SPI pins, which are unique
-// // to each board and not reassignable. For Arduino Uno: MOSI = pin 11 and
-// // SCLK = pin 13. This is the fastest mode of operation and is required if
-// // using the breakout board's microSD card.
-
-// // OPTION 2 lets you interface the tft using ANY TWO or THREE PINS,
-// // tradeoff being that performance is not as fast as hardware SPI above.
-// #define TFT_MOSI 23  // Data out
-// #define TFT_SCLK 18  // Clock out
-
-// // For ST7735-based tfts, we will use this call
-// #define ST7735_YELLOW ST77XX_YELLOW
-
-// // Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST);
-
-// #include <Fonts/FreeMonoBold12pt7b.h>
-// #include <Fonts/FreeMonoBold9pt7b.h>
-// #include <Fonts/FreeSansBold24pt7b.h>
-// #include <Fonts/FreeMonoBold18pt7b.h>
-// #include <Fonts/FreeMono9pt7b.h>
-// String Variablel = "person";
-
-// void displaysetup(){
-// //   tft.initR(INITR_MINI160x80);
-// //   tft.setSPISpeed(40000000);
-// //   tft.fillScreen(ST77XX_BLACK);
-// //   tft.setTextWrap(false);
-// //   tft.setRotation(1);
-
-// }
-
-// void showDisplay()
-// {
-//   tft.drawBitmap(0,0,bellicon,50,50,ST7735_YELLOW);
-
-//   for (int i = 1; i < 3; i++)
-//   {
-
-//     // tft.setFont(&FreeMono9pt7b);
-//   tft.fillRoundRect(5, 5, 75, 75, 5, ST77XX_YELLOW);
-//   tft.setTextSize(1);
-//   tft.setTextColor(tft.color565(255, 0, 255), tft.color565(0,0,0));
-
-//   tft.setCursor(10, 20);
-//   tft.println("Welcome");
-
-//   delay(3000);
-//   tft.fillScreen(ST77XX_BLACK);
-
-// // delay(3000);
-// //   // tft.drawBitmap(0,0,wifi,50,50,ST77XX_GREEN);
-// //   tft.setFont(&FreeMono9pt7b);
-// //   tft.setTextSize(0);
-
-// //   // tft.drawRect(5, 75, 75, 75, ST77XX_YELLOW);
-
-//   tft.setTextSize(2);
-
-//   tft.setCursor(10, 20);
-
-//   tft.println(Variablel);
-
-//   }
-
-// }/
+	delay(5000);
+	cleanDisplay();
+}
