@@ -10,11 +10,25 @@ Current stack of the project will follow
 * [Arduino](http://arduino.cc) - IoT framework
 * [Espressif](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/) - IoT framework
 
-### Hard Ware
-ESP32            |  FTDI
-:-------------------------:|:-------------------------:
-![ESP32](docs/ESP32.jpg) | ![FTDI](docs/FTDI.jpg)
+### Data Flow
+<p align="center">
+  <img src="docs/diagram/ConnectionDiagram.png">
+</p>
 
+### Model Spec
+<p align="center">
+  <img src="docs/diagram/modelSpec.png">
+</p>
+
+### Limitation
+<p align="center">
+  <img src="docs/diagram/limitation.png">
+</p>
+
+### Hardware
+ESP32|FTDI
+|---|---|
+![ESP32](docs/ESP32.jpg) | ![FTDI](docs/FTDI.jpg)
 
 ### Connection Diagram
 <p align="center">
