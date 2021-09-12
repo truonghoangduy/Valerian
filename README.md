@@ -31,6 +31,9 @@ A bit high cracker here and there if you guys **wanna chat about it**, feel free
 
 📍 If you guys like this kind of ***storytelling*** leave me a ⭐️ on this repo. It really ***motivate*** me to sharing the rest of this avenger story of hacking my way throughout.
 
+### Foreground! (interest nugget)
+Why I chosing running this services in foreground 😂 I belive this is you guys gonna be here! **SO STAY TUNE 🔔** OK I will wrote it how it work down there!
+
 ### Data Flow
 <p align="center">
   <img src="docs/diagram/ConnectionDiagram.png">
