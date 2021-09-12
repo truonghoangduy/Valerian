@@ -25,9 +25,11 @@ I really want to took a big cracker on the Flutter and learning about the Androi
 
 *----------------------------*
 
-A bit high cracker here and there if you guys wanna chat about it, feel free to issue me or just hook me up in voice calling for questioning ideaer and Icebreaker
+A bit high cracker here and there if you guys **wanna chat about it**, feel free to issue me or just hook me up in voice calling for questioning ideaer and Icebreaker
 
 *----------------------------*
+
+📍 If you guys like this kind of ***storytelling*** leave me a ⭐️ on this repo. It really ***motivate*** me to sharing the rest of this avenger story of hacking my way throughout.
 
 ### Data Flow
 <p align="center">
